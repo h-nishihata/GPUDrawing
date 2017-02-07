@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "pingPongBuffer.h"
 
 class ofApp : public ofBaseApp{
 	public:
@@ -20,18 +21,29 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
-    ofShader shader;
-    ofVbo vbo;
-    ofEasyCam cam;
+    ofShader render, updatePos;
+    pingPongBuffer pingPong;    
+    
+    ofNode node;
+    
+    ofCamera cam;
+//    ofEasyCam cam;
+    float camPosX =  256;
+    float camPosY =  256;
+    float camPosZ =  400;
+    bool xFlag, yFlag, zFlag;
     
     ofImage img;
     static const int width = 512;
     static const int height = 512;
     static const int numParticles = width * width;
 
+    ofVbo vbo;
+//    ofVboMesh vboMesh;
     ofPixels_<unsigned char> pixels;
     ofVec3f myVerts[numParticles];
-//    ofVec3f myNormals[numParticles];
+    ofVec2f myCoords[numParticles];
     ofFloatColor myColor[numParticles];
     
+    ofVec3f emitterPos, prevEmitterPos;    
 };
