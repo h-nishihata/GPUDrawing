@@ -30,7 +30,7 @@ class ofApp : public ofBaseApp{
 //    ofEasyCam cam;
     float camPosX =  256;
     float camPosY =  256;
-    float camPosZ =  400;
+    float camPosZ =  800;
     bool xFlag, yFlag, zFlag;
     
     ofImage img;
@@ -39,7 +39,6 @@ class ofApp : public ofBaseApp{
     static const int numParticles = width * width;
 
     ofVbo vbo;
-//    ofVboMesh vboMesh;
     ofPixels_<unsigned char> pixels;
     ofVec3f myVerts[numParticles];
     ofVec2f myCoords[numParticles];
