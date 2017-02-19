@@ -3,10 +3,9 @@
 #extension GL_ARB_texture_rectangle : enable
 #extension GL_ARB_draw_buffers : enable
 
-// ユーティリティのインクルード
-#pragma include "util.frag"
-// 4D Simplex Noiseのインクルード
-#pragma include "noise4D.frag"
+//#pragma include "util.frag"
+//#pragma include "noise4D.frag"
+#pragma include "noise.frag"
 
 uniform sampler2DRect u_posAndAgeTex;
 uniform sampler2DRect u_velAndMaxAgeTex;
@@ -28,7 +27,7 @@ void main(void){
     
     float age = posAndAge.w; // 経過時間
     float maxAge = velAndMaxAge.w; // 生存期間
-    
+    /*
     age++;
     
     // パーティクルが生存期間を過ぎたら初期化
@@ -42,12 +41,21 @@ void main(void){
         pos = startPos + vec3(r * sin(theta) * cos(phi), r * sin(theta) * sin(phi), r * cos(theta));
         vel.xyz = vec3(normalize(startPos));
     }
-    
+     
     // Curl Noiseで速度を更新
     vel.x += snoise(vec4(pos.x * u_scale, pos.y * u_scale, pos.z * u_scale, 0.1352 * u_time * u_timestep));
     vel.y += snoise(vec4(pos.x * u_scale, pos.y * u_scale, pos.z * u_scale, 1.2814 * u_time * u_timestep));
     vel.z += snoise(vec4(pos.x * u_scale, pos.y * u_scale, pos.z * u_scale, 2.5564 * u_time * u_timestep));
+    */
     
+    vec2 position = gl_FragCoord.xy;
+    
+    float c = snoise(vec3(vec2(position/64.0), u_time*0.5));
+    
+    for(float i = 32.; i > 0.; i -= 1.) {
+        c = mix(c,snoise(vec3(vec2(position/i-i*2.), u_time*0.5)), 0.03);
+    }
+    vel = vec3(c);
     pos += vel;
     
     gl_FragData[0].rgba = vec4(pos, age); // 位置と経過時間を出力

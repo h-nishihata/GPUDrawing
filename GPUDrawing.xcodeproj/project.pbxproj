@@ -48,6 +48,7 @@
 		73394AC81E472728005A633D /* util.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = util.frag; sourceTree = "<group>"; };
 		73C109041DC4E01E0031F880 /* shader.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.frag; sourceTree = "<group>"; };
 		73C109051DC4E01E0031F880 /* shader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.vert; sourceTree = "<group>"; };
+		73D8F0471E503D2400CCBC15 /* noise.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = noise.frag; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E4B69B5B0A3A1756003C02F2 /* GPUDrawingDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUDrawingDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B69E1D0A3A1BDC003C02F2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
@@ -80,6 +81,7 @@
 		73C109031DC4E01E0031F880 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				73D8F0471E503D2400CCBC15 /* noise.frag */,
 				73C109051DC4E01E0031F880 /* shader.vert */,
 				73394AC61E472728005A633D /* noise4D.frag */,
 				73394AC71E472728005A633D /* update.frag */,

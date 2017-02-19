@@ -40,7 +40,7 @@ void ofApp::setup(){
     }
     
     vbo.setTexCoordData(myCoords, numParticles, GL_DYNAMIC_DRAW);
-    vbo.setVertexData(myVerts, numParticles, GL_DYNAMIC_DRAW);
+    vbo.setVertexData(&myVerts[0], numParticles, GL_DYNAMIC_DRAW);
     vbo.setColorData(myColor, numParticles, GL_STATIC_DRAW);
     
     
@@ -69,6 +69,7 @@ void ofApp::setup(){
 void ofApp::update(){
     ofSetWindowTitle(ofToString(ofGetFrameRate()));
     float time = ofGetElapsedTimef();
+
     cam.lookAt(node);
     
     pingPong.dst->begin();
@@ -82,8 +83,8 @@ void ofApp::update(){
             updatePos.setUniformTexture("u_velAndMaxAgeTex", pingPong.src->getTexture(1), 1);
 //            updatePos.setUniformTexture("u_initialTex", pingPong.src->getTexture(2), 2);
             updatePos.setUniform1f("u_time", ofGetElapsedTimef());
-            updatePos.setUniform1f("u_timestep", 0.01);
-            updatePos.setUniform1f("u_scale", 0.5);
+            updatePos.setUniform1f("u_timestep", 0.5);
+            updatePos.setUniform1f("u_scale", 0.005);
     
             pingPong.src->draw(0, 0);
         
@@ -108,11 +109,23 @@ void ofApp::draw(){
     
         ofDisablePointSprites();
     ofPopStyle();
+    
+    if(showTex){
+        ofPushStyle();
+        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+        pingPong.dst->getTexture(0).draw(0,0);
+        ofDrawBitmapStringHighlight("Position", 0,14);
+        pingPong.dst->getTexture(1).draw(width,0);
+        ofDrawBitmapStringHighlight("Velocity", width,14);
+        ofPopStyle();
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
+    if(key==' '){
+        showTex = !showTex;
+    }
 }
 
 //--------------------------------------------------------------

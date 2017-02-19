@@ -30,10 +30,11 @@ class ofApp : public ofBaseApp{
 //    ofEasyCam cam;
     float camPosX =  256;
     float camPosY =  256;
-    float camPosZ =  800;
+    float camPosZ =  600;
     bool xFlag, yFlag, zFlag;
     
     ofImage img;
+    
     static const int width = 512;
     static const int height = 512;
     static const int numParticles = width * width;
@@ -44,5 +45,6 @@ class ofApp : public ofBaseApp{
     ofVec2f myCoords[numParticles];
     ofFloatColor myColor[numParticles];
     
-    ofVec3f emitterPos, prevEmitterPos;    
+    bool showTex = true;
+    
 };
