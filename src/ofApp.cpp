@@ -85,6 +85,7 @@ void ofApp::update(){
             updatePos.setUniform1f("u_time", ofGetElapsedTimef());
             updatePos.setUniform1f("u_timestep", 0.5);
             updatePos.setUniform1f("u_scale", 0.005);
+            updatePos.setUniform2f("u_resolution", ofGetWidth(), ofGetHeight());
     
             pingPong.src->draw(0, 0);
         
@@ -114,9 +115,9 @@ void ofApp::draw(){
         ofPushStyle();
         ofEnableBlendMode(OF_BLENDMODE_ALPHA);
         pingPong.dst->getTexture(0).draw(0,0);
-        ofDrawBitmapStringHighlight("Position", 0,14);
-        pingPong.dst->getTexture(1).draw(width,0);
-        ofDrawBitmapStringHighlight("Velocity", width,14);
+        ofDrawBitmapStringHighlight("Position", 0, 14);
+        pingPong.dst->getTexture(1).draw(width, 0);
+        ofDrawBitmapStringHighlight("Velocity", width, 14);
         ofPopStyle();
     }
 }

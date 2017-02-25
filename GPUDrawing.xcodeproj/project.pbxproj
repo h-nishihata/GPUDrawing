@@ -43,9 +43,7 @@
 
 /* Begin PBXFileReference section */
 		73394AC51E4718D2005A633D /* pingPongBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pingPongBuffer.h; sourceTree = "<group>"; };
-		73394AC61E472728005A633D /* noise4D.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = noise4D.frag; sourceTree = "<group>"; };
 		73394AC71E472728005A633D /* update.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = update.frag; sourceTree = "<group>"; };
-		73394AC81E472728005A633D /* util.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = util.frag; sourceTree = "<group>"; };
 		73C109041DC4E01E0031F880 /* shader.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.frag; sourceTree = "<group>"; };
 		73C109051DC4E01E0031F880 /* shader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.vert; sourceTree = "<group>"; };
 		73D8F0471E503D2400CCBC15 /* noise.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = noise.frag; sourceTree = "<group>"; };
@@ -83,9 +81,7 @@
 			children = (
 				73D8F0471E503D2400CCBC15 /* noise.frag */,
 				73C109051DC4E01E0031F880 /* shader.vert */,
-				73394AC61E472728005A633D /* noise4D.frag */,
 				73394AC71E472728005A633D /* update.frag */,
-				73394AC81E472728005A633D /* util.frag */,
 				73C109041DC4E01E0031F880 /* shader.frag */,
 			);
 			name = shaders;

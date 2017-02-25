@@ -3,8 +3,6 @@
 #extension GL_ARB_texture_rectangle : enable
 #extension GL_ARB_draw_buffers : enable
 
-//#pragma include "util.frag"
-//#pragma include "noise4D.frag"
 #pragma include "noise.frag"
 
 uniform sampler2DRect u_posAndAgeTex;
@@ -12,8 +10,7 @@ uniform sampler2DRect u_velAndMaxAgeTex;
 uniform float u_time;
 uniform float u_timestep;
 uniform float u_scale;
-uniform vec3 u_emitterPos;
-uniform vec3 u_prevEmitterPos;
+uniform vec2  u_resolution;
 
 void main(void){
     vec2 st = gl_TexCoord[0].st;
@@ -27,35 +24,40 @@ void main(void){
     
     float age = posAndAge.w; // 経過時間
     float maxAge = velAndMaxAge.w; // 生存期間
+    vec2 resolution = u_resolution;
+//    age ++;
+    
     /*
-    age++;
-    
-    // パーティクルが生存期間を過ぎたら初期化
-    if(age >= maxAge){
-        age = 0;
-        maxAge = 50.0 + 250.0 * random(pos.xx);
-        float theta = 2.0 * PI * random(pos.yy);
-        float phi = PI * random(pos.zz);
-        float r = 5.0 * random(pos.xy);
-        vec3 startPos = u_prevEmitterPos + (u_emitterPos - u_prevEmitterPos) * random(pos.yz);
-        pos = startPos + vec3(r * sin(theta) * cos(phi), r * sin(theta) * sin(phi), r * cos(theta));
-        vel.xyz = vec3(normalize(startPos));
-    }
-     
-    // Curl Noiseで速度を更新
-    vel.x += snoise(vec4(pos.x * u_scale, pos.y * u_scale, pos.z * u_scale, 0.1352 * u_time * u_timestep));
-    vel.y += snoise(vec4(pos.x * u_scale, pos.y * u_scale, pos.z * u_scale, 1.2814 * u_time * u_timestep));
-    vel.z += snoise(vec4(pos.x * u_scale, pos.y * u_scale, pos.z * u_scale, 2.5564 * u_time * u_timestep));
-    */
-    
     vec2 position = gl_FragCoord.xy;
     
-    float c = snoise(vec3(vec2(position/64.0), u_time*0.5));
+    float c_x = snoise(vec3(vec2(position/128.0), u_time*0.5));
+    float c_y = snoise(vec3(vec2(position/64.0), u_time*0.1));
+    float c_z = snoise(vec3(vec2(position/32.0), u_time*0.2));
+//    for(float i = 32.; i > 0.; i -= 1.) {
+//        c = mix(c,snoise(vec3(vec2(position/i-i*2.), u_time*0.5)), 0.03);
+//    }
+    vel.x += c_x/100;
+    vel.y += c_y/100;
+    vel.z += c_z/100;
     
-    for(float i = 32.; i > 0.; i -= 1.) {
-        c = mix(c,snoise(vec3(vec2(position/i-i*2.), u_time*0.5)), 0.03);
-    }
-    vel = vec3(c);
+    pos += vel;
+    */
+    
+    vec2 p = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+    float t = 0.0, d;
+    float time2 = u_time / 2.0;
+    
+    vec2 q = vec2(0.0);
+    q.x = fbm(p + 0.00 * time2);
+    q.y = fbm(p + vec2(1.0));
+    vec2 r = vec2(0.0);
+    r.x = fbm(p + 1.0 * q + vec2(1.7, 9.2) + 0.15 * time2);
+    r.y = fbm(p + 1.0 * q + vec2(8.3, 2.8) + 0.126 * time2);
+    
+    vel.x += r.x/100.0;
+    vel.y += r.y/100.0;
+    vel.z += (r.x+r.y)/200.0;
+    
     pos += vel;
     
     gl_FragData[0].rgba = vec4(pos, age); // 位置と経過時間を出力

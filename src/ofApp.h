@@ -26,8 +26,8 @@ class ofApp : public ofBaseApp{
     
     ofNode node;
     
-    ofCamera cam;
-//    ofEasyCam cam;
+//    ofCamera cam;
+    ofEasyCam cam;
     float camPosX =  256;
     float camPosY =  256;
     float camPosZ =  600;
