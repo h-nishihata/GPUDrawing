@@ -3,14 +3,27 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetVerticalSync(false);
+    ofSetFrameRate(0);
+    /*
+    ofSetVerticalSync(true); になっていると処理がどんなに早く終わってもディスプレイの垂直同期を待ってからの描画になるので60fpsで頭打ちになります。
+    この場合十分に処理が早いといいのですが、何かの問題で1フレームあたりの処理にコンスタントに 1000ms/60 = 16.6666ms 以上かかってしまった場合、本来描画するはずの垂直同期に間にあわなくなり最悪次の垂直同期まで待つことになるので急にレートが30fpsまで落ちることがあります。
+    なので見た目のブラッシュアップまでも行かないベースシステムの開発中の時は:
+     
+     ofSetVerticalSync(false);
+     ofSetFrameRate(0);
+    
+    のような感じで垂直同期OFF、フレームレート上限無しのフリーランの状態で開発するのが処理が今どれぐらいの負荷になっているのかがfpsを見るだけで大体わかっていい。
+    見た目的な部分に入ってきた場合には垂直同期が入ってないとティアリングがおきるので入れといてください。 by satoruhiga
+    */
+    
     ofBackground(0);
     ofDisableAlphaBlending();
     
-    cam.setupPerspective();
+    cam.setupPerspective(); // set the image to the right direction
     cam.setPosition(camPosX, camPosY, camPosZ);
-    node.setPosition(256, 256, 0);
+    cam.setParent(node[1]);
     
-    render.load("shaders/shader");
+    render.load("shaders/render");
     updatePos.load("", "shaders/update.frag");
     
     
@@ -18,7 +31,7 @@ void ofApp::setup(){
     pixels = img.getPixels();
     
     pingPong.allocate(width, height, GL_RGBA32F, 2);
-    float * posAndAge = new float[width * height * 4];
+    float* posAndAge = new float[width*height*4];
     
     for(int i=0; i<width; i++){
         for(int j=0; j<height; j++){
@@ -43,8 +56,8 @@ void ofApp::setup(){
     vbo.setVertexData(&myVerts[0], numParticles, GL_DYNAMIC_DRAW);
     vbo.setColorData(myColor, numParticles, GL_STATIC_DRAW);
     
-    
     pingPong.src -> getTexture(0).loadData(posAndAge, width, height, GL_RGBA);
+    // バッファを増やすときはpingPongBuffer.hも変更が必要
 //    pingPong.src -> getTexture(2).loadData(initPos, width, height, GL_RGBA);
     delete [] posAndAge;
 //    delete [] initPos;
@@ -54,23 +67,35 @@ void ofApp::setup(){
     for (int x = 0; x < width; x++){
         for (int y = 0; y < height; y++){
             int i = width * y + x;
-            velAndMaxAge[i*4 + 0] = 0.0;
-            velAndMaxAge[i*4 + 1] = 0.0;
-            velAndMaxAge[i*4 + 2] = 0.0;
-            velAndMaxAge[i*4 + 3] = ofRandom(1,150);
+            velAndMaxAge[i*4+0] = 0.0;
+            velAndMaxAge[i*4+1] = 0.0;
+            velAndMaxAge[i*4+2] = 0.0;
+            velAndMaxAge[i*4+3] = ofRandom(1,150);
         }
     }
     
     pingPong.src -> getTexture(1).loadData(velAndMaxAge, width, height, GL_RGBA);
     delete [] velAndMaxAge;
+    
+    showTex = false;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
     ofSetWindowTitle(ofToString(ofGetFrameRate()));
+    cam.lookAt(node[1]);
     float time = ofGetElapsedTimef();
-
-    cam.lookAt(node);
+    
+    float freqMult = 0.5;
+    float amp = 5;
+    
+    for (int i=0; i<3; i++) {
+        node[i].setPosition(ofVec3f(sin(time * freqMult)*amp + 256*i, cos(time * freqMult)*amp + 256*i, sin(time * freqMult)*amp));
+        
+        freqMult *= 0.8;
+        amp *= 2;
+    }
+    
     
     pingPong.dst->begin();
     
@@ -82,10 +107,9 @@ void ofApp::update(){
             updatePos.setUniformTexture("u_posAndAgeTex", pingPong.src->getTexture(0), 0);
             updatePos.setUniformTexture("u_velAndMaxAgeTex", pingPong.src->getTexture(1), 1);
 //            updatePos.setUniformTexture("u_initialTex", pingPong.src->getTexture(2), 2);
-            updatePos.setUniform1f("u_time", ofGetElapsedTimef());
-            updatePos.setUniform1f("u_timestep", 0.5);
-            updatePos.setUniform1f("u_scale", 0.005);
+            updatePos.setUniform1f("u_time", time);
             updatePos.setUniform2f("u_resolution", ofGetWidth(), ofGetHeight());
+            updatePos.setUniform3f("u_nodePos", node[0].getPosition());
     
             pingPong.src->draw(0, 0);
         
@@ -93,13 +117,21 @@ void ofApp::update(){
     
     pingPong.dst->end();
     pingPong.swap();
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+    
     ofPushStyle();
         ofEnableBlendMode(OF_BLENDMODE_ADD);
         ofEnablePointSprites();
+    
+    ofSetColor(255,0,0);
+    //    for (int i=0; i<3; i++) {
+//    node[0].setScale(10);
+    node[1].draw();
+    //    }
     
         cam.begin();
             render.begin();
@@ -111,13 +143,16 @@ void ofApp::draw(){
         ofDisablePointSprites();
     ofPopStyle();
     
+    
     if(showTex){
         ofPushStyle();
-        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-        pingPong.dst->getTexture(0).draw(0,0);
-        ofDrawBitmapStringHighlight("Position", 0, 14);
-        pingPong.dst->getTexture(1).draw(width, 0);
-        ofDrawBitmapStringHighlight("Velocity", width, 14);
+            ofEnableBlendMode(OF_BLENDMODE_ALPHA
+                              );
+            pingPong.dst->getTexture(0).draw(0, 0);
+            ofDrawBitmapStringHighlight("Position", 0, 14);
+        
+            pingPong.dst->getTexture(1).draw(width, 0);
+            ofDrawBitmapStringHighlight("Velocity", width, 14);
         ofPopStyle();
     }
 }

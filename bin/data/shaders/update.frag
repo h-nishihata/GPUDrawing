@@ -8,9 +8,8 @@
 uniform sampler2DRect u_posAndAgeTex;
 uniform sampler2DRect u_velAndMaxAgeTex;
 uniform float u_time;
-uniform float u_timestep;
-uniform float u_scale;
 uniform vec2  u_resolution;
+uniform vec3  u_nodePos;
 
 void main(void){
     vec2 st = gl_TexCoord[0].st;
@@ -18,14 +17,13 @@ void main(void){
     vec4 posAndAge = texture2DRect(u_posAndAgeTex,st);
     // 前の速度と生存期間を取得
     vec4 velAndMaxAge = texture2DRect(u_velAndMaxAgeTex,st);
-    
     vec3 pos = posAndAge.xyz; // 前の位置
     vec3 vel = velAndMaxAge.xyz; // 前の速度
-    
+    vec2 resolution = u_resolution;
+    vec3 nodePos = u_nodePos;
     float age = posAndAge.w; // 経過時間
     float maxAge = velAndMaxAge.w; // 生存期間
-    vec2 resolution = u_resolution;
-//    age ++;
+//    age = 1.0;
     
     /*
     vec2 position = gl_FragCoord.xy;
@@ -43,6 +41,7 @@ void main(void){
     pos += vel;
     */
     
+    
     vec2 p = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
     float t = 0.0, d;
     float time2 = u_time / 2.0;
@@ -53,12 +52,15 @@ void main(void){
     vec2 r = vec2(0.0);
     r.x = fbm(p + 1.0 * q + vec2(1.7, 9.2) + 0.15 * time2);
     r.y = fbm(p + 1.0 * q + vec2(8.3, 2.8) + 0.126 * time2);
+    float f = fbm(p + r);
+    vec3 v = vec3(f);
+
+    pos.x += v.x * nodePos.x;
+    pos.y += v.y * nodePos.y;
+    pos.z += v.z * nodePos.z;
     
-    vel.x += r.x/100.0;
-    vel.y += r.y/100.0;
-    vel.z += (r.x+r.y)/200.0;
-    
-    pos += vel;
+    vel = v;
+    //　ひとまずBuffer 1（vel & maxAge）は使わないのでマップを表示
     
     gl_FragData[0].rgba = vec4(pos, age); // 位置と経過時間を出力
     gl_FragData[1].rgba = vec4(vel, maxAge); //速度と生存期間を出力

@@ -2,8 +2,6 @@
 #extension GL_EXT_gpu_shader4 : enable
 #extension GL_ARB_texture_rectangle : enable
 
-#pragma include "util.frag"
-
 uniform sampler2DRect u_posAndAgeTex;
 
 void main() {

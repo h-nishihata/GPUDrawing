@@ -24,20 +24,19 @@ class ofApp : public ofBaseApp{
     ofShader render, updatePos;
     pingPongBuffer pingPong;    
     
-    ofNode node;
+    ofNode node[3];
     
-//    ofCamera cam;
-    ofEasyCam cam;
-    float camPosX =  256;
-    float camPosY =  256;
-    float camPosZ =  600;
+    ofCamera cam;
+    float camPosX = 0;
+    float camPosY = 0;
+    float camPosZ = 600;
     bool xFlag, yFlag, zFlag;
     
     ofImage img;
     
     static const int width = 512;
     static const int height = 512;
-    static const int numParticles = width * width;
+    static const int numParticles = width * height;
 
     ofVbo vbo;
     ofPixels_<unsigned char> pixels;
@@ -45,6 +44,5 @@ class ofApp : public ofBaseApp{
     ofVec2f myCoords[numParticles];
     ofFloatColor myColor[numParticles];
     
-    bool showTex = true;
-    
+    bool showTex;
 };

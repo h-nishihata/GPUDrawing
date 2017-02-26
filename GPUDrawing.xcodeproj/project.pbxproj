@@ -44,8 +44,8 @@
 /* Begin PBXFileReference section */
 		73394AC51E4718D2005A633D /* pingPongBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pingPongBuffer.h; sourceTree = "<group>"; };
 		73394AC71E472728005A633D /* update.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = update.frag; sourceTree = "<group>"; };
-		73C109041DC4E01E0031F880 /* shader.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.frag; sourceTree = "<group>"; };
-		73C109051DC4E01E0031F880 /* shader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shader.vert; sourceTree = "<group>"; };
+		73C9C60A1E6275B600E03AE0 /* render.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = render.frag; sourceTree = "<group>"; };
+		73C9C60B1E6275B600E03AE0 /* render.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = render.vert; sourceTree = "<group>"; };
 		73D8F0471E503D2400CCBC15 /* noise.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = noise.frag; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
 		E4B69B5B0A3A1756003C02F2 /* GPUDrawingDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUDrawingDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,9 +80,9 @@
 			isa = PBXGroup;
 			children = (
 				73D8F0471E503D2400CCBC15 /* noise.frag */,
-				73C109051DC4E01E0031F880 /* shader.vert */,
+				73C9C60A1E6275B600E03AE0 /* render.frag */,
+				73C9C60B1E6275B600E03AE0 /* render.vert */,
 				73394AC71E472728005A633D /* update.frag */,
-				73C109041DC4E01E0031F880 /* shader.frag */,
 			);
 			name = shaders;
 			path = bin/data/shaders;
