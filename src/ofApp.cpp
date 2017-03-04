@@ -22,6 +22,12 @@ void ofApp::setup(){
     cam.setupPerspective(); // set the image to the right direction
     cam.setPosition(camPosX, camPosY, camPosZ);
     cam.setParent(node[1]);
+
+    for (int i=0; i<numNodes; i++) {
+        if(i>0){
+            node[i].setParent(node[i-1]);
+        }
+    }
     
     render.load("shaders/render");
     updatePos.load("", "shaders/update.frag");
@@ -32,6 +38,9 @@ void ofApp::setup(){
     
     pingPong.allocate(width, height, GL_RGBA32F, 2);
     float* posAndAge = new float[width*height*4];
+    
+    int offsetX = width * 0.5;
+    int offsetY = height * 0.5;
     
     for(int i=0; i<width; i++){
         for(int j=0; j<height; j++){
@@ -44,8 +53,8 @@ void ofApp::setup(){
             myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
             myColor[j*width+i] = ofFloatColor(r,g,b,1.0);
             
-            posAndAge[j*width*4+i*4+0] = i;
-            posAndAge[j*width*4+i*4+1] = j;
+            posAndAge[j*width*4+i*4+0] = i-offsetX;
+            posAndAge[j*width*4+i*4+1] = j-offsetY;
             posAndAge[j*width*4+i*4+2] = brightness*256.0;
             posAndAge[j*width*4+i*4+3] = 0;
             
@@ -83,17 +92,15 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     ofSetWindowTitle(ofToString(ofGetFrameRate()));
-    cam.lookAt(node[1]);
+    
     float time = ofGetElapsedTimef();
     
-    float freqMult = 0.5;
-    float amp = 5;
-    
-    for (int i=0; i<3; i++) {
-        node[i].setPosition(ofVec3f(sin(time * freqMult)*amp + 256*i, cos(time * freqMult)*amp + 256*i, sin(time * freqMult)*amp));
-        
-        freqMult *= 0.8;
-        amp *= 2;
+    float freq = 0.2; // 周期
+    float amp = 1;    // 振幅
+    for (int i=0; i<numNodes; i++) {
+        node[i].setPosition(ofVec3f(sin(time * freq)*amp, cos(time * freq)*amp, sin(time * freq)*amp));
+//        freq *= 1.5;
+        amp *= 200;
     }
     
     
@@ -127,13 +134,18 @@ void ofApp::draw(){
         ofEnableBlendMode(OF_BLENDMODE_ADD);
         ofEnablePointSprites();
     
-    ofSetColor(255,0,0);
-    //    for (int i=0; i<3; i++) {
-//    node[0].setScale(10);
-    node[1].draw();
-    //    }
-    
+        cam.lookAt(node[0]);
         cam.begin();
+    
+            for (int i=0; i<numNodes; i++) {
+                if(i==0){
+                    ofSetColor(255, 0, 0);
+                }else{
+                    ofSetColor(0, 0, 255);
+                }
+                node[i].draw();
+            }
+    
             render.begin();
                 render.setUniformTexture("u_posAndAgeTex", pingPong.src->getTexture(0), 0);
                 vbo.draw(GL_POINTS, 0, numParticles);

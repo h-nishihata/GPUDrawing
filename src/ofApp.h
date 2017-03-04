@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "pingPongBuffer.h"
 
+#define numNodes 2
+
 class ofApp : public ofBaseApp{
 	public:
 		void setup();
@@ -24,7 +26,7 @@ class ofApp : public ofBaseApp{
     ofShader render, updatePos;
     pingPongBuffer pingPong;    
     
-    ofNode node[3];
+    ofNode node[numNodes];
     
     ofCamera cam;
     float camPosX = 0;

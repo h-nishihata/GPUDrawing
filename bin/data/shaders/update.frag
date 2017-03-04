@@ -23,23 +23,7 @@ void main(void){
     vec3 nodePos = u_nodePos;
     float age = posAndAge.w; // 経過時間
     float maxAge = velAndMaxAge.w; // 生存期間
-//    age = 1.0;
-    
-    /*
-    vec2 position = gl_FragCoord.xy;
-    
-    float c_x = snoise(vec3(vec2(position/128.0), u_time*0.5));
-    float c_y = snoise(vec3(vec2(position/64.0), u_time*0.1));
-    float c_z = snoise(vec3(vec2(position/32.0), u_time*0.2));
-//    for(float i = 32.; i > 0.; i -= 1.) {
-//        c = mix(c,snoise(vec3(vec2(position/i-i*2.), u_time*0.5)), 0.03);
-//    }
-    vel.x += c_x/100;
-    vel.y += c_y/100;
-    vel.z += c_z/100;
-    
-    pos += vel;
-    */
+    vec3 init = vec3(0,0,0);
     
     
     vec2 p = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
@@ -58,7 +42,7 @@ void main(void){
     pos.x += v.x * nodePos.x;
     pos.y += v.y * nodePos.y;
     pos.z += v.z * nodePos.z;
-    
+        
     vel = v;
     //　ひとまずBuffer 1（vel & maxAge）は使わないのでマップを表示
     
