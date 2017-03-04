@@ -103,6 +103,22 @@ void ofApp::update(){
         amp *= 200;
     }
     
+    float distFromZero = abs(camPosZ);
+    float velPct;
+    velPct = ofMap(distFromZero, 0, camPosLmt, 1.0, 0.01);
+    
+    if (!zFlag) {        
+        camPosZ -= 6 * velPct;
+        if (camPosZ <= camPosLmt*-1) {
+            zFlag = true;
+        }
+    }else if(zFlag) {
+        camPosZ += 6 * velPct;
+        if (camPosZ >= camPosLmt) {
+            zFlag = false;
+        }
+    }
+    cam.setGlobalPosition(camPosX, camPosY, camPosZ);
     
     pingPong.dst->begin();
     
