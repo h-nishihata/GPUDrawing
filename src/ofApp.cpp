@@ -102,7 +102,7 @@ void ofApp::update(){
 //        freq *= 1.5;
         amp *= 200;
     }
-    
+    /*
     float distFromZero = abs(camPosZ);
     float velPct;
     velPct = ofMap(distFromZero, 0, camPosLmt, 1.0, 0.01);
@@ -119,7 +119,7 @@ void ofApp::update(){
         }
     }
     cam.setGlobalPosition(camPosX, camPosY, camPosZ);
-    
+    */
     pingPong.dst->begin();
     
         pingPong.dst->activateAllDrawBuffers();

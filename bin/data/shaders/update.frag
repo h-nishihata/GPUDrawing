@@ -23,8 +23,10 @@ void main(void){
     vec3 nodePos = u_nodePos;
     float age = posAndAge.w; // 経過時間
     float maxAge = velAndMaxAge.w; // 生存期間
-    vec3 init = vec3(0,0,0);
+    vec3 init = vec3(0, 0, 0);
+    vec3 repulsion;
     
+    age = 1.0;
     
     vec2 p = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
     float t = 0.0, d;
@@ -38,14 +40,23 @@ void main(void){
     r.y = fbm(p + 1.0 * q + vec2(8.3, 2.8) + 0.126 * time2);
     float f = fbm(p + r);
     vec3 v = vec3(f);
-
-    pos.x += v.x * nodePos.x;
-    pos.y += v.y * nodePos.y;
-    pos.z += v.z * nodePos.z;
-        
-    vel = v;
-    //　ひとまずBuffer 1（vel & maxAge）は使わないのでマップを表示
     
+//    vel = v;
+    
+    vel.x = v.x * nodePos.x;
+    vel.y = v.y * nodePos.y;
+    vel.z = v.z * nodePos.z;
+    
+    /* repulsion
+    repulsion = vec3(init - pos);
+    if(sqrt(repulsion.x * repulsion.x + repulsion.y * repulsion.y + repulsion.z * repulsion.z) < 100){
+        normalize(repulsion);
+        vel -= repulsion;
+    }
+    pos += vel;
+    */
+    
+    pos += vel;
     gl_FragData[0].rgba = vec4(pos, age); // 位置と経過時間を出力
     gl_FragData[1].rgba = vec4(vel, maxAge); //速度と生存期間を出力
 }

@@ -31,9 +31,9 @@ class ofApp : public ofBaseApp{
     ofCamera cam;
     float camPosX = 0;
     float camPosY = 0;
-    float camPosZ = 400;
+    float camPosZ = 512;
     bool xFlag, yFlag, zFlag;
-    float camPosLmt = 600;
+    float camPosLmt = 800;
     
     ofImage img;
     
