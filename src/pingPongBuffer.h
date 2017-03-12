@@ -1,6 +1,7 @@
 #ifndef GPUParticles_pingPongBuffer_h
 #define GPUParticles_pingPongBuffer_h
 
+#define numFBOs 3
 // examples/gl/gpuParticleSystemExampleを元に、複数バッファ書き出しに対応
 
 struct pingPongBuffer {
@@ -36,7 +37,7 @@ public:
     }
     
     void clear(){
-        for(int i = 0; i < 2; i++){
+        for(int i = 0; i < numFBOs; i++){
             FBOs[i].begin();
             ofClear(0,255);
             FBOs[i].end();
@@ -48,7 +49,7 @@ public:
     ofFbo   *src;       // Source       ->  Ping
     ofFbo   *dst;       // Destination  ->  Pong
 private:
-    ofFbo   FBOs[2];    // Real addresses of ping/pong FBO´s
+    ofFbo   FBOs[numFBOs];    // Real addresses of ping/pong FBO´s
     int     flag;       // Integer for making a quick swap
 };
 

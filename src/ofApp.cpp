@@ -36,8 +36,9 @@ void ofApp::setup(){
     img.load("test.jpg");
     pixels = img.getPixels();
     
-    pingPong.allocate(width, height, GL_RGBA32F, 2);
+    pingPong.allocate(width, height, GL_RGBA32F, 3);
     float* posAndAge = new float[width*height*4];
+    float* initPos = new float[width*height*4];
     
     int offsetX = width * 0.5;
     int offsetY = height * 0.5;
@@ -53,11 +54,11 @@ void ofApp::setup(){
             myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
             myColor[j*width+i] = ofFloatColor(r,g,b,1.0);
             
-            posAndAge[j*width*4+i*4+0] = i-offsetX;
-            posAndAge[j*width*4+i*4+1] = j-offsetY;
-            posAndAge[j*width*4+i*4+2] = brightness*256.0;
-            posAndAge[j*width*4+i*4+3] = 0;
-            
+            initPos[j*width*4+i*4+0] = posAndAge[j*width*4+i*4+0] = i-offsetX;
+            initPos[j*width*4+i*4+1] = posAndAge[j*width*4+i*4+1] = j-offsetY;
+            initPos[j*width*4+i*4+2] = posAndAge[j*width*4+i*4+2] = brightness*256.0;
+            posAndAge[j*width*4+i*4+3] = 1.0; // map alpha value
+            initPos[j*width*4+i*4+3] = 30.0;  // particles life time
         }
     }
     
@@ -67,9 +68,9 @@ void ofApp::setup(){
     
     pingPong.src -> getTexture(0).loadData(posAndAge, width, height, GL_RGBA);
     // バッファを増やすときはpingPongBuffer.hも変更が必要
-//    pingPong.src -> getTexture(2).loadData(initPos, width, height, GL_RGBA);
+    pingPong.src -> getTexture(2).loadData(initPos, width, height, GL_RGBA);
     delete [] posAndAge;
-//    delete [] initPos;
+    delete [] initPos;
     
     
     float * velAndMaxAge = new float[width * height * 4];
@@ -127,9 +128,9 @@ void ofApp::update(){
         
         updatePos.begin();
     
-            updatePos.setUniformTexture("u_posAndAgeTex", pingPong.src->getTexture(0), 0);
-            updatePos.setUniformTexture("u_velAndMaxAgeTex", pingPong.src->getTexture(1), 1);
-//            updatePos.setUniformTexture("u_initialTex", pingPong.src->getTexture(2), 2);
+            updatePos.setUniformTexture("u_posTex", pingPong.src->getTexture(0), 0);
+            updatePos.setUniformTexture("u_velTex", pingPong.src->getTexture(1), 1);
+            updatePos.setUniformTexture("u_initialTex", pingPong.src->getTexture(2), 2);
             updatePos.setUniform1f("u_time", time);
             updatePos.setUniform2f("u_resolution", ofGetWidth(), ofGetHeight());
             updatePos.setUniform3f("u_nodePos", node[0].getPosition());
@@ -163,7 +164,7 @@ void ofApp::draw(){
             }
     
             render.begin();
-                render.setUniformTexture("u_posAndAgeTex", pingPong.src->getTexture(0), 0);
+                render.setUniformTexture("u_posTex", pingPong.src->getTexture(0), 0);
                 vbo.draw(GL_POINTS, 0, numParticles);
             render.end();
         cam.end();

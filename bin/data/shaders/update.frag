@@ -5,28 +5,32 @@
 
 #pragma include "noise.frag"
 
-uniform sampler2DRect u_posAndAgeTex;
-uniform sampler2DRect u_velAndMaxAgeTex;
+uniform sampler2DRect u_posTex;
+uniform sampler2DRect u_velTex;
+uniform sampler2DRect u_initialTex;
 uniform float u_time;
 uniform vec2  u_resolution;
 uniform vec3  u_nodePos;
 
 void main(void){
     vec2 st = gl_TexCoord[0].st;
-    // 前の位置情報とパーティクル初期化からの経過時間を取得
-    vec4 posAndAge = texture2DRect(u_posAndAgeTex,st);
-    // 前の速度と生存期間を取得
-    vec4 velAndMaxAge = texture2DRect(u_velAndMaxAgeTex,st);
-    vec3 pos = posAndAge.xyz; // 前の位置
-    vec3 vel = velAndMaxAge.xyz; // 前の速度
+    
+    vec4 position = texture2DRect(u_posTex,st);
+    vec4 velocity = texture2DRect(u_velTex,st);
+    vec4 initPos = texture2DRect(u_initialTex,st);
+    
+    vec3 pos = position.xyz;
+    vec3 vel = velocity.xyz;
+    vec3 init = initPos.xyz;
+    
     vec2 resolution = u_resolution;
     vec3 nodePos = u_nodePos;
-    float age = posAndAge.w; // 経過時間
-    float maxAge = velAndMaxAge.w; // 生存期間
-    vec3 init = vec3(0, 0, 0);
-    vec3 repulsion;
+//    vec3 repulsion;
+    float lifeTime = initPos.w;
     
-    age = 1.0;
+    float posMapAlpha = position.w;
+    float velMapAlpha = velocity.w;
+
     
     vec2 p = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
     float t = 0.0, d;
@@ -41,11 +45,15 @@ void main(void){
     float f = fbm(p + r);
     vec3 v = vec3(f);
     
-//    vel = v;
-    
-    vel.x = v.x * nodePos.x;
-    vel.y = v.y * nodePos.y;
-    vel.z = v.z * nodePos.z;
+    if(u_time < lifeTime){
+        vel.x = v.x * nodePos.x;
+        vel.y = v.y * nodePos.y;
+        vel.z = v.z * nodePos.z;
+    }else{
+        if(abs(init.x - pos.x)>0.1){ vel.x = (init.x - pos.x)*0.1; }else{ vel.x=0; }
+        if(abs(init.y - pos.y)>0.1){ vel.y = (init.y - pos.y)*0.1; }else{ vel.y=0; }
+        if(abs(init.z - pos.z)>0.1){ vel.z = (init.z - pos.z)*0.1; }else{ vel.z=0; }
+    }
     
     /* repulsion
     repulsion = vec3(init - pos);
@@ -57,6 +65,8 @@ void main(void){
     */
     
     pos += vel;
-    gl_FragData[0].rgba = vec4(pos, age); // 位置と経過時間を出力
-    gl_FragData[1].rgba = vec4(vel, maxAge); //速度と生存期間を出力
+    
+    gl_FragData[0].rgba = vec4(pos, posMapAlpha); // 位置と経過時間を出力
+    gl_FragData[1].rgba = vec4(vel, velMapAlpha); //速度と生存期間を出力
+    gl_FragData[2].rgba = vec4(init, lifeTime);
 }
