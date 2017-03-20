@@ -4,6 +4,7 @@
 #include "pingPongBuffer.h"
 
 #define numNodes 2
+#define numImgs 3
 
 class ofApp : public ofBaseApp{
 	public:
@@ -23,6 +24,9 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
+        void setInitImage();
+        void setNextImage(int imgID);
+    
     ofShader render, updatePos;
     pingPongBuffer pingPong;    
     
@@ -36,6 +40,7 @@ class ofApp : public ofBaseApp{
     float camPosLmt = 800;
     
     ofImage img;
+    int imgID;
     
     static const int width = 512;
     static const int height = 512;
@@ -47,5 +52,5 @@ class ofApp : public ofBaseApp{
     ofVec2f myCoords[numParticles];
     ofFloatColor myColor[numParticles];
     
-    bool showTex;
+    bool debugMode;
 };

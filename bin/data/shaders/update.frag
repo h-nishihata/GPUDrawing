@@ -7,7 +7,7 @@
 
 uniform sampler2DRect u_posTex;
 uniform sampler2DRect u_velTex;
-uniform sampler2DRect u_initialTex;
+uniform sampler2DRect u_nextPosTex;
 uniform float u_time;
 uniform vec2  u_resolution;
 uniform vec3  u_nodePos;
@@ -17,16 +17,15 @@ void main(void){
     
     vec4 position = texture2DRect(u_posTex,st);
     vec4 velocity = texture2DRect(u_velTex,st);
-    vec4 initPos = texture2DRect(u_initialTex,st);
+    vec4 nextPos  = texture2DRect(u_nextPosTex,st);
     
-    vec3 pos = position.xyz;
-    vec3 vel = velocity.xyz;
-    vec3 init = initPos.xyz;
+    vec3 pos  = position.xyz;
+    vec3 vel  = velocity.xyz;
+    vec3 next = nextPos.xyz;
     
     vec2 resolution = u_resolution;
     vec3 nodePos = u_nodePos;
-//    vec3 repulsion;
-    float lifeTime = initPos.w;
+    float lifeTime = nextPos.w;
     
     float posMapAlpha = position.w;
     float velMapAlpha = velocity.w;
@@ -45,18 +44,18 @@ void main(void){
     float f = fbm(p + r);
     vec3 v = vec3(f);
     
+    
     if(u_time < lifeTime){
         vel.x = v.x * nodePos.x;
         vel.y = v.y * nodePos.y;
         vel.z = v.z * nodePos.z;
     }else{
-        if(abs(init.x - pos.x)>0.1){ vel.x = (init.x - pos.x)*0.1; }else{ vel.x=0; }
-        if(abs(init.y - pos.y)>0.1){ vel.y = (init.y - pos.y)*0.1; }else{ vel.y=0; }
-        if(abs(init.z - pos.z)>0.1){ vel.z = (init.z - pos.z)*0.1; }else{ vel.z=0; }
+        if(abs(next.x - pos.x)>0.1){ vel.x = (next.x - pos.x)*0.1; }else{ vel.x=0; }
+        if(abs(next.y - pos.y)>0.1){ vel.y = (next.y - pos.y)*0.1; }else{ vel.y=0; }
+        if(abs(next.z - pos.z)>0.1){ vel.z = (next.z - pos.z)*0.1; }else{ vel.z=0; }
     }
-    
     /* repulsion
-    repulsion = vec3(init - pos);
+    repulsion = vec3(next - pos);
     if(sqrt(repulsion.x * repulsion.x + repulsion.y * repulsion.y + repulsion.z * repulsion.z) < 100){
         normalize(repulsion);
         vel -= repulsion;
@@ -66,7 +65,7 @@ void main(void){
     
     pos += vel;
     
-    gl_FragData[0].rgba = vec4(pos, posMapAlpha); // 位置と経過時間を出力
-    gl_FragData[1].rgba = vec4(vel, velMapAlpha); //速度と生存期間を出力
-    gl_FragData[2].rgba = vec4(init, lifeTime);
+    gl_FragData[0].rgba = vec4(pos,  posMapAlpha);
+    gl_FragData[1].rgba = vec4(vel,  velMapAlpha);
+    gl_FragData[2].rgba = vec4(next, lifeTime);
 }
