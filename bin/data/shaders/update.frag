@@ -11,6 +11,7 @@ uniform sampler2DRect u_nextPosTex;
 uniform float u_time;
 uniform vec2  u_resolution;
 uniform vec3  u_nodePos;
+uniform int   u_overdose;
 
 void main(void){
     vec2 st = gl_TexCoord[0].st;
@@ -26,6 +27,7 @@ void main(void){
     vec2 resolution = u_resolution;
     vec3 nodePos = u_nodePos;
     float lifeTime = nextPos.w;
+    int overdose = u_overdose;
     
     float posMapAlpha = position.w;
     float velMapAlpha = velocity.w;
@@ -45,11 +47,11 @@ void main(void){
     vec3 v = vec3(f);
     
     
-    if(u_time < lifeTime){
+    if(overdose == 0){
         vel.x = v.x * nodePos.x;
         vel.y = v.y * nodePos.y;
         vel.z = v.z * nodePos.z;
-    }else{
+    }else if(overdose == 1){
         if(abs(next.x - pos.x)>0.1){ vel.x = (next.x - pos.x)*0.1; }else{ vel.x=0; }
         if(abs(next.y - pos.y)>0.1){ vel.y = (next.y - pos.y)*0.1; }else{ vel.y=0; }
         if(abs(next.z - pos.z)>0.1){ vel.z = (next.z - pos.z)*0.1; }else{ vel.z=0; }

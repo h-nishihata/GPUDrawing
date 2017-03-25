@@ -52,5 +52,9 @@ class ofApp : public ofBaseApp{
     ofVec2f myCoords[numParticles];
     ofFloatColor myColor[numParticles];
     
+    float lifeTime = 30.0;
+    int overdose;
+    bool imgUpdated;
+    
     bool debugMode;
 };

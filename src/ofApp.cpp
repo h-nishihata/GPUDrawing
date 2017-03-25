@@ -18,7 +18,7 @@ void ofApp::setInitImage(){
             float r = (float)pixels[j*width*3+i*3+0] / 256.0;
             float g = (float)pixels[j*width*3+i*3+1] / 256.0;
             float b = (float)pixels[j*width*3+i*3+2] / 256.0;
-            float brightness = (r + g + b) / 3.0f;
+            float brightness = (r+g+b) * 0.3333;
             
             myCoords[j*width+i] = ofVec2f(i,j);
             myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
@@ -79,7 +79,7 @@ void ofApp::setNextImage(int _imgID){
             float r = (float)pixels[j*width*3+i*3+0] / 256.0;
             float g = (float)pixels[j*width*3+i*3+1] / 256.0;
             float b = (float)pixels[j*width*3+i*3+2] / 256.0;
-            float brightness = (r + g + b) / 3.0f;
+            float brightness = (r+g+b) * 0.3333;
             
             myCoords[j*width+i] = ofVec2f(i,j);
             myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
@@ -88,7 +88,7 @@ void ofApp::setNextImage(int _imgID){
             nextPos[j*width*4+i*4+0] = i-offsetX;
             nextPos[j*width*4+i*4+1] = j-offsetY;
             nextPos[j*width*4+i*4+2] = brightness*256.0;
-            nextPos[j*width*4+i*4+3] = 10.0;  // particles life time
+            nextPos[j*width*4+i*4+3] = lifeTime;  // particles life time
         }
     }
     
@@ -144,6 +144,18 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     float time = ofGetElapsedTimef();
+    int surplus = (int)time % (int)lifeTime;
+    if((surplus == 0) && ((int)time != 0)){
+        overdose = 1;
+        if(!imgUpdated){
+            imgID++;
+            setNextImage(imgID);
+            imgUpdated = true;
+        }
+    }else{
+        overdose = 0;
+        imgUpdated = false;
+    }
     
     float freq = 0.2; // 周期
     float amp = 0.5;  // 振幅
@@ -184,6 +196,7 @@ void ofApp::update(){
             updatePos.setUniform1f("u_time", time);
             updatePos.setUniform2f("u_resolution", ofGetWidth(), ofGetHeight());
             updatePos.setUniform3f("u_nodePos", node[0].getPosition());
+            updatePos.setUniform1i("u_overdose", overdose);
     
             pingPong.src->draw(0, 0);
         
