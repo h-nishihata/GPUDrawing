@@ -134,8 +134,6 @@ void ofApp::setup(){
     
     pingPong.allocate(width, height, GL_RGBA32F, 3);
     
-//　モーフィングするときに次の画像のvbo.setが必要だが、初回のみsetup()内で行うことになるので（今のところ）更新できない
-    setNextImage(imgID); // 最初と同じ画像をセット
     setInitImage();
     
     debugMode = false;
@@ -145,7 +143,7 @@ void ofApp::setup(){
 void ofApp::update(){
     float time = ofGetElapsedTimef();
     int surplus = (int)time % (int)lifeTime;
-    if((surplus == 0) && ((int)time != 0)){
+    if(((surplus == 0) && ((int)time != 0)) || (debugSwapImages)){
         overdose = 1;
         if(!imgUpdated){
             imgID++;
@@ -157,30 +155,38 @@ void ofApp::update(){
         imgUpdated = false;
     }
     
-    float freq = 0.2; // 周期
-    float amp = 0.5;  // 振幅
+    // debug
+    if((time - startCount <= 1.0) && ((int)time != 0)){
+        debugSwapImages = true;
+    }else{
+        debugSwapImages = false;
+    }
+    
+    float freq = 0.2;
+    float amp = 0.5;
     for (int i=0; i<numNodes; i++) {
         node[i].setPosition(ofVec3f(sin(time * freq)*amp, cos(time * freq)*amp, sin(time * freq)*amp));
-//        freq *= 1.5;
-        amp *= 200;
+        freq *= 0.5;
+        amp *= 400;
     }
+    
     /*
     float distFromZero = abs(camPosZ);
     float velPct;
-    velPct = ofMap(distFromZero, 0, camPosLmt, 1.0, 0.01);
+    velPct = ofMap(distFromZero, 0, camPosLmt, 1.0, 0.0);
     
-    if (!zFlag) {        
-        camPosZ -= 6 * velPct;
-        if (camPosZ <= camPosLmt*-1) {
+    if (!zFlag) {
+        camPosZ -= 3 * velPct;
+        if (camPosZ <= camPosLmt * -0.5) {
             zFlag = true;
         }
     }else if(zFlag) {
-        camPosZ += 6 * velPct;
+        camPosZ += 3 * velPct;
         if (camPosZ >= camPosLmt) {
             zFlag = false;
         }
     }
-    cam.setGlobalPosition(camPosX, camPosY, camPosZ);
+    cam.setPosition(camPosX, camPosY, camPosZ);
     */
     
     pingPong.dst->begin();
@@ -205,6 +211,16 @@ void ofApp::update(){
     pingPong.dst->end();
     pingPong.swap();
     
+}
+
+double inOutQuad(double t,double totaltime,double max ,double min )
+{
+    max -= min;
+    t /= totaltime;
+    if( t / 2 < 1 )
+    return max/2 * t * t + min;
+    --t;
+    return -max * (t * (t-2)-1) + min;
 }
 
 //--------------------------------------------------------------
@@ -253,9 +269,8 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
     if(key==' '){
         debugMode = !debugMode;
-    }else if(key == 'i'){
-        imgID++;
-        setNextImage(imgID);
+    }else if(key=='i'){
+        startCount = ofGetElapsedTimef();
     }
 }
 

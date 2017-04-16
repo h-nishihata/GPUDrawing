@@ -26,7 +26,7 @@ class ofApp : public ofBaseApp{
     
         void setInitImage();
         void setNextImage(int imgID);
-    
+        double inOutQuad(double t, double totaltime, double max, double min);
     ofShader render, updatePos;
     pingPongBuffer pingPong;    
     
@@ -37,7 +37,7 @@ class ofApp : public ofBaseApp{
     float camPosY = 0;
     float camPosZ = 512;
     bool xFlag, yFlag, zFlag;
-    float camPosLmt = 800;
+    float camPosLmt = 600;
     
     ofImage img;
     int imgID;
@@ -55,6 +55,8 @@ class ofApp : public ofBaseApp{
     float lifeTime = 30.0;
     int overdose;
     bool imgUpdated;
+    bool debugSwapImages;
+    float startCount;
     
-    bool debugMode;
+    bool debugMode;    
 };
