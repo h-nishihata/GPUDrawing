@@ -26,7 +26,8 @@ class ofApp : public ofBaseApp{
     
         void setInitImage();
         void setNextImage(int imgID);
-        double inOutQuad(double t, double totaltime, double max, double min);
+        float easeInOutQuad (float current, float init = 0, float destination = 100, float duration = 1);
+    
     ofShader render, updatePos;
     pingPongBuffer pingPong;    
     
@@ -37,7 +38,7 @@ class ofApp : public ofBaseApp{
     float camPosY = 0;
     float camPosZ = 512;
     bool xFlag, yFlag, zFlag;
-    float camPosLmt = 600;
+    float camZLength = 600;
     
     ofImage img;
     int imgID;

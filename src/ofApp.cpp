@@ -15,15 +15,14 @@ void ofApp::setInitImage(){
     
     for(int i=0; i<width; i++){
         for(int j=0; j<height; j++){
-            float r = (float)pixels[j*width*3+i*3+0] / 256.0;
-            float g = (float)pixels[j*width*3+i*3+1] / 256.0;
-            float b = (float)pixels[j*width*3+i*3+2] / 256.0;
+            float r = (float)1.0-(pixels[j*width*3+i*3+0] / 256.0);
+            float g = (float)0.6-(pixels[j*width*3+i*3+1] / 256.0);
+            float b = (float)0.3-(pixels[j*width*3+i*3+2] / 256.0);
             float brightness = (r+g+b) * 0.3333;
             
             myCoords[j*width+i] = ofVec2f(i,j);
             myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
             myColor[j*width+i] = ofFloatColor(r,g,b,1.0);
-            
             position[j*width*4+i*4+0] = i-offsetX;
             position[j*width*4+i*4+1] = j-offsetY;
             position[j*width*4+i*4+2] = brightness*256.0;
@@ -76,9 +75,9 @@ void ofApp::setNextImage(int _imgID){
     
     for(int i=0; i<width; i++){
         for(int j=0; j<height; j++){
-            float r = (float)pixels[j*width*3+i*3+0] / 256.0;
-            float g = (float)pixels[j*width*3+i*3+1] / 256.0;
-            float b = (float)pixels[j*width*3+i*3+2] / 256.0;
+            float r = (float)1.0-(pixels[j*width*3+i*3+0] / 256.0);
+            float g = (float)0.6-(pixels[j*width*3+i*3+1] / 256.0);
+            float b = (float)0.3-(pixels[j*width*3+i*3+2] / 256.0);
             float brightness = (r+g+b) * 0.3333;
             
             myCoords[j*width+i] = ofVec2f(i,j);
@@ -102,7 +101,7 @@ void ofApp::setNextImage(int _imgID){
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetVerticalSync(false);
+    ofSetVerticalSync(true);
     ofSetFrameRate(0);
     /*
     ofSetVerticalSync(true); になっていると処理がどんなに早く終わってもディスプレイの垂直同期を待ってからの描画になるので60fpsで頭打ちになります。
@@ -162,32 +161,37 @@ void ofApp::update(){
         debugSwapImages = false;
     }
     
+    // nodes
     float freq = 0.2;
-    float amp = 0.5;
+    float amp = 1.0;
     for (int i=0; i<numNodes; i++) {
         node[i].setPosition(ofVec3f(sin(time * freq)*amp, cos(time * freq)*amp, sin(time * freq)*amp));
         freq *= 0.5;
-        amp *= 400;
+        amp *= 200;
     }
     
-    /*
-    float distFromZero = abs(camPosZ);
-    float velPct;
-    velPct = ofMap(distFromZero, 0, camPosLmt, 1.0, 0.0);
+    // camera
+    static float zCount;
+    zCount += 1.0e-3; // 1.0e-3 = 0.001, 1.0e+3 = 1000
+    
+    float camEasingZ;
+    camEasingZ = easeInOutQuad(zCount, 0.0, camZLength, 1.0);
     
     if (!zFlag) {
-        camPosZ -= 3 * velPct;
-        if (camPosZ <= camPosLmt * -0.5) {
+        camPosZ = ((camZLength-camEasingZ)-(camZLength/2));
+        if (camPosZ <= camZLength/2*-1) {
             zFlag = true;
+            zCount = 0;
         }
     }else if(zFlag) {
-        camPosZ += 3 * velPct;
-        if (camPosZ >= camPosLmt) {
+        camPosZ = (camEasingZ-camZLength/2);
+        if (camPosZ >= camZLength/2) {
             zFlag = false;
+            zCount = 0;
         }
     }
     cam.setPosition(camPosX, camPosY, camPosZ);
-    */
+
     
     pingPong.dst->begin();
     
@@ -213,14 +217,12 @@ void ofApp::update(){
     
 }
 
-double inOutQuad(double t,double totaltime,double max ,double min )
-{
-    max -= min;
-    t /= totaltime;
-    if( t / 2 < 1 )
-    return max/2 * t * t + min;
-    --t;
-    return -max * (t * (t-2)-1) + min;
+//--------------------------------------------------------------
+float ofApp::easeInOutQuad (float current, float init, float destination, float duration) {
+    if ((current/=duration/2) < 1){
+        return destination/2*current*current + init;
+    }
+    return -destination/2 * ((--current)*(current-2) - 1) + init;
 }
 
 //--------------------------------------------------------------
