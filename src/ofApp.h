@@ -2,9 +2,13 @@
 
 #include "ofMain.h"
 #include "pingPongBuffer.h"
-
 #define numNodes 2
 #define numImgs 3
+
+#include "ofxOsc.h"
+#define HOST "localhost"
+#define PORT 1234
+
 
 class ofApp : public ofBaseApp{
 	public:
@@ -59,5 +63,7 @@ class ofApp : public ofBaseApp{
     bool debugSwapImages;
     float startCount;
     
-    bool debugMode;    
+    bool debugMode;
+    
+    ofxOscSender sender;
 };

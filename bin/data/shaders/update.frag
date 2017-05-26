@@ -56,14 +56,6 @@ void main(void){
         if(abs(next.y - pos.y)>0.1){ vel.y = (next.y - pos.y)*0.1; }else{ vel.y=0; }
         if(abs(next.z - pos.z)>0.1){ vel.z = (next.z - pos.z)*0.1; }else{ vel.z=0; }
     }
-    /* repulsion
-    repulsion = vec3(next - pos);
-    if(sqrt(repulsion.x * repulsion.x + repulsion.y * repulsion.y + repulsion.z * repulsion.z) < 100){
-        normalize(repulsion);
-        vel -= repulsion;
-    }
-    pos += vel;
-    */
     
     pos += vel;
     

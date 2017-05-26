@@ -103,17 +103,6 @@ void ofApp::setNextImage(int _imgID){
 void ofApp::setup(){
     ofSetVerticalSync(true);
     ofSetFrameRate(0);
-    /*
-    ofSetVerticalSync(true); になっていると処理がどんなに早く終わってもディスプレイの垂直同期を待ってからの描画になるので60fpsで頭打ちになります。
-    この場合十分に処理が早いといいのですが、何かの問題で1フレームあたりの処理にコンスタントに 1000ms/60 = 16.6666ms 以上かかってしまった場合、本来描画するはずの垂直同期に間にあわなくなり最悪次の垂直同期まで待つことになるので急にレートが30fpsまで落ちることがあります。
-    なので見た目のブラッシュアップまでも行かないベースシステムの開発中の時は:
-     
-     ofSetVerticalSync(false);
-     ofSetFrameRate(0);
-    
-    のような感じで垂直同期OFF、フレームレート上限無しのフリーランの状態で開発するのが処理が今どれぐらいの負荷になっているのかがfpsを見るだけで大体わかっていい。
-    見た目的な部分に入ってきた場合には垂直同期が入ってないとティアリングがおきるので入れといてください。 by satoruhiga
-    */
     
     ofBackground(0);
     ofDisableAlphaBlending();
@@ -136,6 +125,8 @@ void ofApp::setup(){
     setInitImage();
     
     debugMode = false;
+    
+    sender.setup(HOST, PORT);
 }
 
 //--------------------------------------------------------------
@@ -273,6 +264,14 @@ void ofApp::keyPressed(int key){
         debugMode = !debugMode;
     }else if(key=='i'){
         startCount = ofGetElapsedTimef();
+    }else if(key == 'a'){
+        ofxOscMessage m;
+        m.setAddress("/test");
+        m.addIntArg(1);
+        m.addFloatArg(3.5f);
+        m.addStringArg("hello");
+        m.addFloatArg(ofGetElapsedTimef());
+        sender.sendMessage(m, false);
     }
 }
 

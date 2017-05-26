@@ -1,7 +1,3 @@
-//uniform float time;
-//uniform vec2 mouse;
-//uniform vec2 resolution;
-
 #define NUM_OCTAVES 16
 mat3 rotX(float a) {
     float c = cos(a);
