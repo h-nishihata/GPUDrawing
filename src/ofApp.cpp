@@ -206,6 +206,16 @@ void ofApp::update(){
     pingPong.dst->end();
     pingPong.swap();
     
+    
+    if((int)time % 10 == 0){
+        ofxOscMessage msg0, msg1;
+        msg0.setAddress("/nodePos/x");
+        msg0.addFloatArg(abs(node[0].getX()));
+        sender.sendMessage(msg0, false);
+        msg1.setAddress("/nodePos/y");
+        msg1.addFloatArg(abs(node[0].getY()));
+        sender.sendMessage(msg1, false);
+    }
 }
 
 //--------------------------------------------------------------
@@ -265,13 +275,10 @@ void ofApp::keyPressed(int key){
     }else if(key=='i'){
         startCount = ofGetElapsedTimef();
     }else if(key == 'a'){
-        ofxOscMessage m;
-        m.setAddress("/test");
-        m.addIntArg(1);
-        m.addFloatArg(3.5f);
-        m.addStringArg("hello");
-        m.addFloatArg(ofGetElapsedTimef());
-        sender.sendMessage(m, false);
+//        m.addIntArg(1);
+//        m.addFloatArg(3.5f);
+//        m.addStringArg("hello");
+//        m.addFloatArg(ofGetElapsedTimef());
     }
 }
 
