@@ -8,37 +8,39 @@ void ofApp::setInitImage(){
     img.load("test_00.jpg");
     pixels = img.getPixels();
     
-    position = new float[width*height*4];
+    position = new float[width*height*4*numVbos];
     
     int offsetX = width * 0.5;
     int offsetY = height * 0.5;
     
-    for(int i=0; i<width; i++){
-        for(int j=0; j<height; j++){
-            float r = (float)1.0-(pixels[j*width*3+i*3+0] / 256.0);
-            float g = (float)0.6-(pixels[j*width*3+i*3+1] / 256.0);
-            float b = (float)0.3-(pixels[j*width*3+i*3+2] / 256.0);
-            float brightness = (r+g+b) * 0.3333;
-            
-            myCoords[j*width+i] = ofVec2f(i,j);
-            myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
-            myColor[j*width+i] = ofFloatColor(r,g,b,1.0);
-            position[j*width*4+i*4+0] = i-offsetX;
-            position[j*width*4+i*4+1] = j-offsetY;
-            position[j*width*4+i*4+2] = brightness*256.0;
-            position[j*width*4+i*4+3] = 1.0; // map alpha value
+    for(int s=0; s<numVbos; s++){
+        for(int i=0; i<width; i++){
+            for(int j=0; j<height; j++){
+                float r = (float)1.0-(pixels[j*width*3+i*3+0] / 256.0);
+                float g = (float)0.6-(pixels[j*width*3+i*3+1] / 256.0);
+                float b = (float)0.3-(pixels[j*width*3+i*3+2] / 256.0);
+                float brightness = (r+g+b) * 0.3333;
+                
+                myCoords[s][j*width+i] = ofVec2f(i,j);
+                myVerts [s][j*width+i] = ofVec3f(i,j,brightness*256.0);
+                myColor [s][j*width+i] = ofFloatColor(r,g,b,1.0);
+                position[(width*height*4*s)+j*width*4+i*4+0] = i-offsetX;
+                position[(width*height*4*s)+j*width*4+i*4+1] = j-offsetY;
+                position[(width*height*4*s)+j*width*4+i*4+2] = brightness*256.0;
+                position[(width*height*4*s)+j*width*4+i*4+3] = 1.0; // map alpha value
+            }
         }
+        
+        vbo[s].setTexCoordData(myCoords[s], numParticles, GL_DYNAMIC_DRAW);
+        vbo[s].setVertexData(&myVerts[s][0], numParticles, GL_DYNAMIC_DRAW);
+        vbo[s].setColorData(myColor[s], numParticles, GL_STATIC_DRAW);
     }
     
-    vbo.setTexCoordData(myCoords, numParticles, GL_DYNAMIC_DRAW);
-    vbo.setVertexData(&myVerts[0], numParticles, GL_DYNAMIC_DRAW);
-    vbo.setColorData(myColor, numParticles, GL_STATIC_DRAW);
-    
-    pingPong.src -> getTexture(0).loadData(position, width, height, GL_RGBA);
+    pingPong.src -> getTexture(0).loadData(position, width, height*numVbos, GL_RGBA);
     delete [] position;
     
     
-    velocity = new float[width * height * 4];
+    velocity = new float[width*height*4*numVbos];
     for (int x = 0; x < width; x++){
         for (int y = 0; y < height; y++){
             int i = width * y + x;
@@ -49,12 +51,12 @@ void ofApp::setInitImage(){
         }
     }
     
-    pingPong.src -> getTexture(1).loadData(velocity, width, height, GL_RGBA);
+    pingPong.src -> getTexture(1).loadData(velocity, width, height*2, GL_RGBA);
     delete [] velocity;
 }
 
 //--------------------------------------------------------------
-void ofApp::setNextImage(int _imgID){
+void ofApp::setNextImage(int _imgID){/*
     char str[20];
     
     if (imgID < numImgs) {
@@ -96,12 +98,12 @@ void ofApp::setNextImage(int _imgID){
     vbo.setColorData(myColor, numParticles, GL_STATIC_DRAW);
     
     pingPong.src -> getTexture(2).loadData(nextPos, width, height, GL_RGBA);
-    delete [] nextPos;
+    delete [] nextPos;*/
 }
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetVerticalSync(true);
+    ofSetVerticalSync(false);
     ofSetFrameRate(0);
     
     ofBackground(0);
@@ -120,7 +122,7 @@ void ofApp::setup(){
     render.load("shaders/render");
     updatePos.load("", "shaders/update.frag");
     
-    pingPong.allocate(width, height, GL_RGBA32F, 3);
+    pingPong.allocate(width, height*2, GL_RGBA32F, 3);
     
     setInitImage();
     
@@ -134,12 +136,12 @@ void ofApp::update(){
     float time = ofGetElapsedTimef();
     int surplus = (int)time % (int)lifeTime;
     if(((surplus == 0) && ((int)time != 0)) || (debugSwapImages)){
-        overdose = 1;
-        if(!imgUpdated){
-            imgID++;
-            setNextImage(imgID);
-            imgUpdated = true;
-        }
+//        overdose = 1;
+//        if(!imgUpdated){
+//            imgID++;
+//            setNextImage(imgID);
+//            imgUpdated = true;
+//        }
     }else{
         overdose = 0;
         imgUpdated = false;
@@ -248,7 +250,10 @@ void ofApp::draw(){
             }
             render.begin();
                 render.setUniformTexture("u_posTex", pingPong.src->getTexture(0), 0);
-                vbo.draw(GL_POINTS, 0, numParticles);
+            for(int i=0; i<numVbos; i++){
+                ofTranslate(i*200, 0, -i*100);
+                vbo[i].draw(GL_POINTS, 0, numParticles);
+            }
             render.end();
         cam.end();
     
@@ -258,10 +263,10 @@ void ofApp::draw(){
     if(debugMode){
         ofPushStyle();
             ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-            pingPong.dst->getTexture(0).draw(0, 0, 350, 350);
+            pingPong.dst->getTexture(0).draw(0, 0, 350, 350*numVbos);
             ofDrawBitmapStringHighlight("Position", 0, 14);
         
-            pingPong.dst->getTexture(1).draw(350, 0, 350, 350);
+            pingPong.dst->getTexture(1).draw(350, 0, 350, 350*numVbos);
             ofDrawBitmapStringHighlight("Velocity", 350, 14);
         ofPopStyle();
         ofDrawBitmapStringHighlight("FPS : " + ofToString(ofGetFrameRate()), 0,ofGetHeight() - 2);
@@ -274,11 +279,6 @@ void ofApp::keyPressed(int key){
         debugMode = !debugMode;
     }else if(key=='i'){
         startCount = ofGetElapsedTimef();
-    }else if(key == 'a'){
-//        m.addIntArg(1);
-//        m.addFloatArg(3.5f);
-//        m.addStringArg("hello");
-//        m.addFloatArg(ofGetElapsedTimef());
     }
 }
 

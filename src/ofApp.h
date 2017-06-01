@@ -4,6 +4,7 @@
 #include "pingPongBuffer.h"
 #define numNodes 2
 #define numImgs 3
+#define numVbos 2
 
 #include "ofxOsc.h"
 #define HOST "localhost"
@@ -51,11 +52,11 @@ class ofApp : public ofBaseApp{
     static const int height = 512;
     static const int numParticles = width * height;
 
-    ofVbo vbo;
+    ofVbo vbo[numVbos];
     ofPixels_<unsigned char> pixels;
-    ofVec3f myVerts[numParticles];
-    ofVec2f myCoords[numParticles];
-    ofFloatColor myColor[numParticles];
+    ofVec3f myVerts[numVbos][numParticles];
+    ofVec2f myCoords[numVbos][numParticles];
+    ofFloatColor myColor[numVbos][numParticles];
     
     float lifeTime = 30.0;
     int overdose;
