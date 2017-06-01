@@ -219,7 +219,7 @@ void ofApp::update(){
         sender.sendMessage(msg1, false);
     }
 }
-
+// add !
 //--------------------------------------------------------------
 float ofApp::easeInOutQuad (float current, float init, float destination, float duration) {
     if ((current/=duration/2) < 1){
