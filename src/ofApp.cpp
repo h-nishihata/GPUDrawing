@@ -110,7 +110,7 @@ void ofApp::setup(){
     cam.setupPerspective(); // set the image to the right direction
     cam.setPosition(camPosX, camPosY, camPosZ);
     cam.setParent(node[1]);
-
+    
     for (int i=0; i<numNodes; i++) {
         if(i>0){
             node[i].setParent(node[i-1]);
@@ -153,15 +153,14 @@ void ofApp::update(){
     }
     
     // nodes
-    float freq = 0.2;
-    float amp = 1.0;
+    float freq = 0.2;    
     for (int i=0; i<numNodes; i++) {
+        float amp = i*200;
         node[i].setPosition(ofVec3f(sin(time * freq)*amp, cos(time * freq)*amp, sin(time * freq)*amp));
         freq *= 0.5;
-        amp *= 200;
     }
     
-    // camera
+    /* camera
     static float zCount;
     zCount += 1.0e-3; // 1.0e-3 = 0.001, 1.0e+3 = 1000
     
@@ -182,26 +181,26 @@ void ofApp::update(){
         }
     }
     cam.setPosition(camPosX, camPosY, camPosZ);
-
+    */
     
     pingPong.dst->begin();
     
-        pingPong.dst->activateAllDrawBuffers();
-        ofClear(0);
-        
-        updatePos.begin();
+    pingPong.dst->activateAllDrawBuffers();
+    ofClear(0);
     
-            updatePos.setUniformTexture("u_posTex", pingPong.src->getTexture(0), 0);
-            updatePos.setUniformTexture("u_velTex", pingPong.src->getTexture(1), 1);
-            updatePos.setUniformTexture("u_nextPosTex", pingPong.src->getTexture(2), 2);
-            updatePos.setUniform1f("u_time", time);
-            updatePos.setUniform2f("u_resolution", ofGetWidth(), ofGetHeight());
-            updatePos.setUniform3f("u_nodePos", node[0].getPosition());
-            updatePos.setUniform1i("u_overdose", overdose);
+    updatePos.begin();
     
-            pingPong.src->draw(0, 0);
-        
-        updatePos.end();
+    updatePos.setUniformTexture("u_posTex", pingPong.src->getTexture(0), 0);
+    updatePos.setUniformTexture("u_velTex", pingPong.src->getTexture(1), 1);
+    updatePos.setUniformTexture("u_nextPosTex", pingPong.src->getTexture(2), 2);
+    updatePos.setUniform1f("u_time", time);
+    updatePos.setUniform2f("u_resolution", ofGetWidth(), ofGetHeight());
+    updatePos.setUniform3f("u_nodePos", node[0].getPosition());
+    updatePos.setUniform1i("u_overdose", overdose);
+    
+    pingPong.src->draw(0, 0);
+    
+    updatePos.end();
     
     pingPong.dst->end();
     pingPong.swap();
@@ -231,38 +230,38 @@ void ofApp::draw(){
     ofHideCursor();
     
     ofPushStyle();
-        ofEnableBlendMode(OF_BLENDMODE_ADD);
-        ofEnablePointSprites();
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    ofEnablePointSprites();
     
-        cam.lookAt(node[0]);
-        cam.begin();
-            if(debugMode){
-                for (int i=0; i<numNodes; i++) {
-                    if(i==0){
-                        ofSetColor(255, 0, 0);
-                    }else{
-                        ofSetColor(0, 0, 255);
-                    }
-                    node[i].draw();
-                }
+    cam.lookAt(node[0]);
+    cam.begin();
+    if(debugMode){
+        for (int i=0; i<numNodes; i++) {
+            if(i==0){
+                ofSetColor(255, 0, 0);
+            }else{
+                ofSetColor(0, 0, 255);
             }
-            render.begin();
-                render.setUniformTexture("u_posTex", pingPong.src->getTexture(0), 0);
-                vbo.draw(GL_POINTS, 0, numParticles);
-            render.end();
-        cam.end();
+            node[i].draw();
+        }
+    }
+    render.begin();
+    render.setUniformTexture("u_posTex", pingPong.src->getTexture(0), 0);
+    vbo.draw(GL_POINTS, 0, numParticles);
+    render.end();
+    cam.end();
     
-        ofDisablePointSprites();
+    ofDisablePointSprites();
     ofPopStyle();
     
     if(debugMode){
         ofPushStyle();
-            ofEnableBlendMode(OF_BLENDMODE_ALPHA);
-            pingPong.dst->getTexture(0).draw(0, 0, 350, 350);
-            ofDrawBitmapStringHighlight("Position", 0, 14);
+        ofEnableBlendMode(OF_BLENDMODE_ALPHA);
+        pingPong.dst->getTexture(0).draw(0, 0, 350, 350);
+        ofDrawBitmapStringHighlight("Position", 0, 14);
         
-            pingPong.dst->getTexture(1).draw(350, 0, 350, 350);
-            ofDrawBitmapStringHighlight("Velocity", 350, 14);
+        pingPong.dst->getTexture(1).draw(350, 0, 350, 350);
+        ofDrawBitmapStringHighlight("Velocity", 350, 14);
         ofPopStyle();
         ofDrawBitmapStringHighlight("FPS : " + ofToString(ofGetFrameRate()), 0,ofGetHeight() - 2);
     }
@@ -274,60 +273,55 @@ void ofApp::keyPressed(int key){
         debugMode = !debugMode;
     }else if(key=='i'){
         startCount = ofGetElapsedTimef();
-    }else if(key == 'a'){
-//        m.addIntArg(1);
-//        m.addFloatArg(3.5f);
-//        m.addStringArg("hello");
-//        m.addFloatArg(ofGetElapsedTimef());
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseEntered(int x, int y){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseExited(int x, int y){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::gotMessage(ofMessage msg){
-
+    
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
+void ofApp::dragEvent(ofDragInfo dragInfo){
+    
 }

@@ -11,29 +11,29 @@
 
 
 class ofApp : public ofBaseApp{
-	public:
-		void setup();
-		void update();
-		void draw();
-		
-		void keyPressed(int key);
-		void keyReleased(int key);
-		void mouseMoved(int x, int y);
-		void mouseDragged(int x, int y, int button);
-		void mousePressed(int x, int y, int button);
-		void mouseReleased(int x, int y, int button);
-		void mouseEntered(int x, int y);
-		void mouseExited(int x, int y);
-		void windowResized(int w, int h);
-		void dragEvent(ofDragInfo dragInfo);
-		void gotMessage(ofMessage msg);
+public:
+    void setup();
+    void update();
+    void draw();
     
-        void setInitImage();
-        void setNextImage(int imgID);
-        float easeInOutQuad (float current, float init = 0, float destination = 100, float duration = 1);
+    void keyPressed(int key);
+    void keyReleased(int key);
+    void mouseMoved(int x, int y);
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+    void mouseEntered(int x, int y);
+    void mouseExited(int x, int y);
+    void windowResized(int w, int h);
+    void dragEvent(ofDragInfo dragInfo);
+    void gotMessage(ofMessage msg);
+    
+    void setInitImage();
+    void setNextImage(int imgID);
+    float easeInOutQuad (float current, float init = 0, float destination = 100, float duration = 1);
     
     ofShader render, updatePos;
-    pingPongBuffer pingPong;    
+    pingPongBuffer pingPong;
     
     ofNode node[numNodes];
     
@@ -50,7 +50,7 @@ class ofApp : public ofBaseApp{
     static const int width = 512;
     static const int height = 512;
     static const int numParticles = width * height;
-
+    
     ofVbo vbo;
     ofPixels_<unsigned char> pixels;
     ofVec3f myVerts[numParticles];

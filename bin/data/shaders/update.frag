@@ -31,6 +31,8 @@ void main(void){
     
     float posMapAlpha = position.w;
     float velMapAlpha = velocity.w;
+    
+    vec3 origin = vec3(0,0,0);
 
     
     vec2 p = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
@@ -48,16 +50,17 @@ void main(void){
     
     
     if(overdose == 0){
-        vel.x = v.x * nodePos.x;
-        vel.y = v.y * nodePos.y;
-        vel.z = v.z * nodePos.z;
+        vel.x = v.x;
+        vel.y = v.y;
+        vel.z = v.z;
     }else if(overdose == 1){
         if(abs(next.x - pos.x)>0.1){ vel.x = (next.x - pos.x)*0.1; }else{ vel.x=0; }
         if(abs(next.y - pos.y)>0.1){ vel.y = (next.y - pos.y)*0.1; }else{ vel.y=0; }
         if(abs(next.z - pos.z)>0.1){ vel.z = (next.z - pos.z)*0.1; }else{ vel.z=0; }
     }
     
-    pos += vel;
+    origin -= vec3(0.3, 0.3, 0.3);
+    pos = origin + pos + vel;
     
     gl_FragData[0].rgba = vec4(pos,  posMapAlpha);
     gl_FragData[1].rgba = vec4(vel,  velMapAlpha);
