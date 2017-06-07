@@ -1,4 +1,5 @@
 #define NUM_OCTAVES 16
+
 mat3 rotX(float a) {
     float c = cos(a);
     float s = sin(a);
@@ -8,6 +9,7 @@ mat3 rotX(float a) {
                 0, s, c
                 );
 }
+
 mat3 rotY(float a) {
     float c = cos(a);
     float s = sin(a);

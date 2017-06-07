@@ -29,7 +29,7 @@ public:
     void gotMessage(ofMessage msg);
     
     void setInitImage();
-    void setNextImage(int imgID);
+    void setNextImage();
     float easeInOutQuad (float current, float init = 0, float destination = 100, float duration = 1);
     
     ofShader render, updatePos;
@@ -57,13 +57,15 @@ public:
     ofVec2f myCoords[numParticles];
     ofFloatColor myColor[numParticles];
     
-    float lifeTime = 30.0;
+    int lifeTime = 10;
     int overdose;
-    bool imgUpdated;
-    bool debugSwapImages;
     float startCount;
+    float morphingDuration = 2.0;    
+    bool isMorphing;
+    bool imgUpdated;
     
     bool debugMode;
     
     ofxOscSender sender;
+    bool oscSent;
 };
