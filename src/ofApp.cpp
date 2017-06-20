@@ -8,25 +8,27 @@ float* velocity;
 
 
 void ofApp::setInitImage(){
-    img.load("test_00.jpg");
+    img.load("specter_00.png");
     pixels = img.getPixels();
     
     currPos = new float[width*height*4];
     currCol = new float[width*height*4];
+    velocity = new float[width*height*4];
     
     int offsetX = width * 0.5;
     int offsetY = height * 0.5;
     
     for(int i=0; i<width; i++){
         for(int j=0; j<height; j++){
-            float r = (float)1.0-(pixels[j*width*3+i*3+0] / 256.0);
-            float g = (float)0.6-(pixels[j*width*3+i*3+1] / 256.0);
-            float b = (float)0.3-(pixels[j*width*3+i*3+2] / 256.0);
+            float r = (float)1.0-(pixels[j*width*4+i*4+0] / 256.0);
+            float g = (float)0.6-(pixels[j*width*4+i*4+1] / 256.0);
+            float b = (float)0.3-(pixels[j*width*4+i*4+2] / 256.0);
             float brightness = (r+g+b) * 0.3333;
             
             myCoords[j*width+i] = ofVec2f(i,j);
             myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
             myColor[j*width+i] = ofFloatColor(r,g,b,1.0);
+            
             currPos[j*width*4+i*4+0] = i-offsetX;
             currPos[j*width*4+i*4+1] = j-offsetY;
             currPos[j*width*4+i*4+2] = brightness*256.0;
@@ -36,6 +38,11 @@ void ofApp::setInitImage(){
             currCol[j*width*4+i*4+1] = g;
             currCol[j*width*4+i*4+2] = b;
             currCol[j*width*4+i*4+3] = 1.0;
+            
+            velocity[j*width*4+i*4+0] = 0.0;
+            velocity[j*width*4+i*4+1] = 0.0;
+            velocity[j*width*4+i*4+2] = 0.0;
+            velocity[j*width*4+i*4+3] = ofRandom(1,150);
         }
     }
     
@@ -47,19 +54,6 @@ void ofApp::setInitImage(){
     delete [] currPos;
     pingPong.src -> getTexture(1).loadData(currCol, width, height, GL_RGBA);
     delete [] currCol;
-    
-    
-    velocity = new float[width * height * 4];
-    for (int x = 0; x < width; x++){
-        for (int y = 0; y < height; y++){
-            int i = width * y + x;
-            velocity[i*4+0] = 0.0;
-            velocity[i*4+1] = 0.0;
-            velocity[i*4+2] = 0.0;
-            velocity[i*4+3] = ofRandom(1,150);
-        }
-    }
-    
     pingPong.src -> getTexture(2).loadData(velocity, width, height, GL_RGBA);
     delete [] velocity;
 }
@@ -72,7 +66,7 @@ void ofApp::setNextImage(){
         imgID = 0;
     }
     
-    sprintf(str, "test_%02d.jpg", imgID);
+    sprintf(str, "specter_%02d.png", imgID);
     
     img.load(str);
     pixels = img.getPixels();
@@ -85,15 +79,15 @@ void ofApp::setNextImage(){
     
     for(int i=0; i<width; i++){
         for(int j=0; j<height; j++){
-            float r = (float)1.0-(pixels[j*width*3+i*3+0] / 256.0);
-            float g = (float)0.6-(pixels[j*width*3+i*3+1] / 256.0);
-            float b = (float)0.3-(pixels[j*width*3+i*3+2] / 256.0);
+            float r = (float)1.0-(pixels[j*width*4+i*4+0] / 256.0);
+            float g = (float)0.6-(pixels[j*width*4+i*4+1] / 256.0);
+            float b = (float)0.3-(pixels[j*width*4+i*4+2] / 256.0);
             float brightness = (r+g+b) * 0.3333;
             
             nextPos[j*width*4+i*4+0] = i-offsetX;
             nextPos[j*width*4+i*4+1] = j-offsetY;
             nextPos[j*width*4+i*4+2] = brightness*256.0;
-            nextPos[j*width*4+i*4+3] = lifeTime;  // particles life time
+            nextPos[j*width*4+i*4+3] = 1.0;
             
             nextCol[j*width*4+i*4+0] = r;
             nextCol[j*width*4+i*4+1] = g;
@@ -132,7 +126,7 @@ void ofApp::setup(){
     pingPong.allocate(width, height, GL_RGBA32F, 5);
     setInitImage();
     
-    debugMode = true;
+    debugMode = false;
     
     sender.setup(HOST, PORT);
 }
@@ -151,21 +145,35 @@ void ofApp::update(){
         isMorphing = false;
     }
     
+    ofxOscMessage pulse;
+    static int pulseLength;
     if(isMorphing){
         if(!imgUpdated){
             imgID++;
             setNextImage();
             imgUpdated = true;
+//            lifeTime = ofRandom(120, 180);            
+            pulse.setAddress("/overdose");
+            pulse.addIntArg(1);
+            sender.sendMessage(pulse, false);
+        }
+        
+        if(pulseLength < 5){
+            pulseLength ++;
+        }else{
+            pulse.setAddress("/overdose");
+            pulse.addIntArg(0);
+            sender.sendMessage(pulse, false);
         }
         overdose = 1;
     }else{
-        overdose = 0;
         imgUpdated = false;
+        pulseLength = 0;
+        overdose = 0;
     }
     
-    
     // nodes
-    float freq = 0.2;    
+    float freq = 0.2;
     for (int i=0; i<numNodes; i++) {
         float amp = i*200;
         node[i].setPosition(ofVec3f(sin(time * freq)*amp, cos(time * freq)*amp, sin(time * freq)*amp));
@@ -222,24 +230,51 @@ void ofApp::update(){
     pingPong.dst->end();
     pingPong.swap();
     
-    
     // osc
+    // ID of messages is correspondent to that of variables of MAX multislider
     if((int)time % 7 == 0){
-        if(!oscSent){
-            ofxOscMessage msg0, msg1, msg2;
-            msg0.setAddress("/nodePos/x");
-            msg0.addFloatArg(abs(node[1].getPosition().normalize().x));
-            sender.sendMessage(msg0, false);
-            msg1.setAddress("/nodePos/y");
-            msg1.addFloatArg(abs(node[1].getPosition().normalize().y));
+        if(!oscSent0){
+            ofxOscMessage msg1, msg2, msg3;
+            msg1.setAddress("/nodePos/x");
+            msg1.addFloatArg(abs(node[1].getPosition().normalize().x));
             sender.sendMessage(msg1, false);
-            msg2.setAddress("/nodePos/z");
-            msg2.addFloatArg(abs(node[1].getPosition().normalize().z));
+            msg2.setAddress("/nodePos/y");
+            msg2.addFloatArg(abs(node[1].getPosition().normalize().y));
             sender.sendMessage(msg2, false);
-            oscSent = true;
+            msg3.setAddress("/nodePos/z");
+            msg3.addFloatArg(abs(node[1].getPosition().normalize().z));
+            sender.sendMessage(msg3, false);
+            oscSent0 = true;
         }
     }else{
-        oscSent = false;
+        oscSent0 = false;
+    }
+    if((int)time % 9 == 0){
+        static int i, j;
+        if(!oscSent1){
+            ofxOscMessage msg4, msg5, msg6, msg7;
+            msg4.setAddress("/pixel/R");
+            msg4.addFloatArg(pixels[j*width*4+i*4+0]);
+            sender.sendMessage(msg4, false);
+            msg5.setAddress("/pixel/G");
+            msg5.addFloatArg(pixels[j*width*4+i*4+1]);
+            sender.sendMessage(msg5, false);
+            msg6.setAddress("/pixel/B");
+            msg6.addFloatArg(pixels[j*width*4+i*4+2]);
+            sender.sendMessage(msg6, false);
+            msg7.setAddress("/pixel/T");
+            msg7.addFloatArg(pixels[j*width*4+i*4+3]);
+            sender.sendMessage(msg7, false);
+            oscSent1 = true;
+        }
+        if(i<width-1){
+            i++;
+            j++;
+        }else{
+            i = j = 0;
+        }
+    }else{
+        oscSent1 = false;
     }
 }
 

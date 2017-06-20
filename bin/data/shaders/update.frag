@@ -36,7 +36,6 @@ void main(void){
     
     vec2 resolution = u_resolution;
     vec3 nodePos = u_nodePos;
-    float lifeTime = nextPosition.w;
     int overdose = u_overdose;
     
     
@@ -90,6 +89,6 @@ void main(void){
     gl_FragData[0].rgba = vec4(currPos, posMapAlpha);
     gl_FragData[1].rgba = vec4(currCol, 1.0);
     gl_FragData[2].rgba = vec4(vel,     velMapAlpha);
-    gl_FragData[3].rgba = vec4(nextPos, lifeTime);
+    gl_FragData[3].rgba = vec4(nextPos, 1.0);
     gl_FragData[4].rgba = vec4(nextCol, 1.0);
 }

@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "pingPongBuffer.h"
 #define numNodes 2
-#define numImgs 3
+#define numImgs 5
 
 #include "ofxOsc.h"
 #define HOST "localhost"
@@ -42,13 +42,13 @@ public:
     float camPosY = 0;
     float camPosZ = 512;
     bool xFlag, yFlag, zFlag;
-    float camZLength = 600;
+    float camZLength = 512;
     
     ofImage img;
     int imgID;
     
-    static const int width = 512;
-    static const int height = 512;
+    static const int width = 640;
+    static const int height = 640;
     static const int numParticles = width * height;
     
     ofVbo vbo;
@@ -57,15 +57,15 @@ public:
     ofVec2f myCoords[numParticles];
     ofFloatColor myColor[numParticles];
     
-    int lifeTime = 10;
+    int lifeTime = 157;
     int overdose;
     float startCount;
-    float morphingDuration = 2.0;    
+    float morphingDuration = 5.0;
     bool isMorphing;
     bool imgUpdated;
     
     bool debugMode;
     
     ofxOscSender sender;
-    bool oscSent;
+    bool oscSent0, oscSent1;
 };
