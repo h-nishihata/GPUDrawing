@@ -25,6 +25,10 @@ void ofApp::setInitImage(){
             float b = (float)0.3-(pixels[j*width*4+i*4+2] / 256.0);
             float brightness = (r+g+b) * 0.3333;
             
+            if ((pixels[j*width*4+i*4+0] > 200) &&
+                (pixels[j*width*4+i*4+2] < 90)){
+                r = g = b = 0;
+            }
             myCoords[j*width+i] = ofVec2f(i,j);
             myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
             myColor[j*width+i] = ofFloatColor(r,g,b,1.0);
@@ -84,6 +88,10 @@ void ofApp::setNextImage(){
             float b = (float)0.3-(pixels[j*width*4+i*4+2] / 256.0);
             float brightness = (r+g+b) * 0.3333;
             
+            if ((pixels[j*width*4+i*4+0] > 200) &&
+                (pixels[j*width*4+i*4+2] < 90)){
+                r = g = b = 0;
+            }
             nextPos[j*width*4+i*4+0] = i-offsetX;
             nextPos[j*width*4+i*4+1] = j-offsetY;
             nextPos[j*width*4+i*4+2] = brightness*256.0;
@@ -111,7 +119,7 @@ void ofApp::setup(){
     ofDisableAlphaBlending();
     
     cam.setupPerspective(); // set the image to the right direction
-    cam.setPosition(camPosX, camPosY, camPosZ);
+    cam.setPosition(0, 0, 512);
     cam.setParent(node[1]);
     
     for (int i=0; i<numNodes; i++) {
@@ -152,7 +160,6 @@ void ofApp::update(){
             imgID++;
             setNextImage();
             imgUpdated = true;
-//            lifeTime = ofRandom(120, 180);            
             pulse.setAddress("/overdose");
             pulse.addIntArg(1);
             sender.sendMessage(pulse, false);
@@ -179,30 +186,6 @@ void ofApp::update(){
         node[i].setPosition(ofVec3f(sin(time * freq)*amp, cos(time * freq)*amp, sin(time * freq)*amp));
         freq *= 0.5;
     }
-    
-    
-    /* camera
-    static float zCount;
-    zCount += 1.0e-3; // 1.0e-3 = 0.001, 1.0e+3 = 1000
-    
-    float camEasingZ;
-    camEasingZ = easeInOutQuad(zCount, 0.0, camZLength, 1.0);
-    
-    if (!zFlag) {
-        camPosZ = ((camZLength-camEasingZ)-(camZLength/2));
-        if (camPosZ <= camZLength/2*-1) {
-            zFlag = true;
-            zCount = 0;
-        }
-    }else if(zFlag) {
-        camPosZ = (camEasingZ-camZLength/2);
-        if (camPosZ >= camZLength/2) {
-            zFlag = false;
-            zCount = 0;
-        }
-    }
-    cam.setPosition(camPosX, camPosY, camPosZ);
-    */
     
     
     // dispatch to update shader

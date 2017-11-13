@@ -36,13 +36,7 @@ public:
     pingPongBuffer pingPong;
     
     ofNode node[numNodes];
-    
     ofCamera cam;
-    float camPosX = 0;
-    float camPosY = 0;
-    float camPosZ = 512;
-    bool xFlag, yFlag, zFlag;
-    float camZLength = 512;
     
     ofImage img;
     int imgID;
