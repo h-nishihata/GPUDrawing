@@ -35,14 +35,16 @@ public:
     ofShader render, updatePos;
     pingPongBuffer pingPong;
     
+    ofFbo renderFBO;
+    
     ofNode node[numNodes];
     ofCamera cam;
     
     ofImage img;
     int imgID;
     
-    static const int width = 640;
-    static const int height = 640;
+    static const int width = 1080;
+    static const int height = 1080;
     static const int numParticles = width * height;
     
     ofVbo vbo;
@@ -51,15 +53,14 @@ public:
     ofVec2f myCoords[numParticles];
     ofFloatColor myColor[numParticles];
     
-    int lifeTime = 157;
+    int lifeTime = 30;
     int overdose;
     float startCount;
     float morphingDuration = 5.0;
     bool isMorphing;
     bool imgUpdated;
     
-    bool debugMode;
-    
     ofxOscSender sender;
     bool oscSent0, oscSent1;
+    bool debugMode;
 };
