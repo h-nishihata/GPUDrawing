@@ -1,10 +1,10 @@
 #include "ofApp.h"
 
 float* currPos;
-float* currCol;
-float* velocity;
-float* nextCol;
 float* nextPos;
+float* currCol;
+float* nextCol;
+float* velocity;
 
 
 void ofApp::setInitImage(){
@@ -20,23 +20,23 @@ void ofApp::setInitImage(){
     
     for(int i=0; i<width; i++){
         for(int j=0; j<height; j++){
-            float r = (float)1.0-(pixels[j*width*4+i*4+0] * 0.0039);
-            float g = (float)0.6-(pixels[j*width*4+i*4+1] * 0.0039);
-            float b = (float)0.3-(pixels[j*width*4+i*4+2] * 0.0039);
+            float r = (float)1.0-(pixels[j*width*4+i*4+0] / 256.0);
+            float g = (float)0.6-(pixels[j*width*4+i*4+1] / 256.0);
+            float b = (float)0.3-(pixels[j*width*4+i*4+2] / 256.0);
             float brightness = (r+g+b) * 0.3333;
             
             if ((pixels[j*width*4+i*4+0] > 200) &&
-                (pixels[j*width*4+i*4+1] > 90)){
+                (pixels[j*width*4+i*4+2] < 90)){
                 r = g = b = 0;
             }
-            myCoords[j*width+i] = ofVec2f(i, j);
-            myVerts[j*width+i] = ofVec3f(i, j, brightness * 256.0);
-            myColor[j*width+i] = ofFloatColor(r, g, b, 1.0);
+            myCoords[j*width+i] = ofVec2f(i,j);
+            myVerts[j*width+i] = ofVec3f(i,j,brightness*256.0);
+            myColor[j*width+i] = ofFloatColor(r,g,b,1.0);
             
-            currPos[j*width*4+i*4+0] = i - offsetX;
-            currPos[j*width*4+i*4+1] = j - offsetY;
-            currPos[j*width*4+i*4+2] = brightness * 256.0;
-            currPos[j*width*4+i*4+3] = 1.0;
+            currPos[j*width*4+i*4+0] = i-offsetX;
+            currPos[j*width*4+i*4+1] = j-offsetY;
+            currPos[j*width*4+i*4+2] = brightness*256.0;
+            currPos[j*width*4+i*4+3] = 1.0; // map alpha value
             
             currCol[j*width*4+i*4+0] = r;
             currCol[j*width*4+i*4+1] = g;
@@ -46,7 +46,7 @@ void ofApp::setInitImage(){
             velocity[j*width*4+i*4+0] = 0.0;
             velocity[j*width*4+i*4+1] = 0.0;
             velocity[j*width*4+i*4+2] = 0.0;
-            velocity[j*width*4+i*4+3] = 1.0;
+            velocity[j*width*4+i*4+3] = ofRandom(1,150);
         }
     }
     
@@ -75,7 +75,6 @@ void ofApp::setNextImage(){
     img.load(str);
     pixels = img.getPixels();
     
-    
     nextPos = new float[width*height*4];
     nextCol = new float[width*height*4];
     
@@ -84,18 +83,18 @@ void ofApp::setNextImage(){
     
     for(int i=0; i<width; i++){
         for(int j=0; j<height; j++){
-            float r = (float)1.0-(pixels[j*width*4+i*4+0] * 0.0039);
-            float g = (float)0.6-(pixels[j*width*4+i*4+1] * 0.0039);
-            float b = (float)0.3-(pixels[j*width*4+i*4+2] * 0.0039);
+            float r = (float)1.0-(pixels[j*width*4+i*4+0] / 256.0);
+            float g = (float)0.6-(pixels[j*width*4+i*4+1] / 256.0);
+            float b = (float)0.3-(pixels[j*width*4+i*4+2] / 256.0);
             float brightness = (r+g+b) * 0.3333;
             
             if ((pixels[j*width*4+i*4+0] > 200) &&
-                (pixels[j*width*4+i*4+1] > 90)){
+                (pixels[j*width*4+i*4+2] < 90)){
                 r = g = b = 0;
             }
             nextPos[j*width*4+i*4+0] = i-offsetX;
             nextPos[j*width*4+i*4+1] = j-offsetY;
-            nextPos[j*width*4+i*4+2] = brightness * 256.0;
+            nextPos[j*width*4+i*4+2] = brightness*256.0;
             nextPos[j*width*4+i*4+3] = 1.0;
             
             nextCol[j*width*4+i*4+0] = r;
@@ -117,9 +116,10 @@ void ofApp::setup(){
     ofSetFrameRate(0);
     
     ofBackground(0);
+    ofDisableAlphaBlending();
     
     cam.setupPerspective(); // set the image to the right direction
-    cam.setPosition(0, 0, 720);
+    cam.setPosition(0, 0, 512);
     cam.setParent(node[1]);
     
     for (int i=0; i<numNodes; i++) {
@@ -132,21 +132,15 @@ void ofApp::setup(){
     updatePos.load("", "shaders/update.frag");
     
     pingPong.allocate(width, height, GL_RGBA32F, 5);
-    
-    // Allocate the final
-    renderFBO.allocate(ofGetWindowWidth(), ofGetWindowHeight(), GL_RGBA32F);
-    renderFBO.begin();
-    ofClear(0, 0, 0, 255);
-    renderFBO.end();
-    
     setInitImage();
+    
+    debugMode = false;
     
     sender.setup(HOST, PORT);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    
     // morphing
     float time = ofGetElapsedTimef();
     if(((int)time % lifeTime == 0) && ((int)time != 0)){
@@ -159,46 +153,49 @@ void ofApp::update(){
         isMorphing = false;
     }
     
-    // ofxOscMessage pulse;
-    // static int pulseLength;
+    ofxOscMessage pulse;
+    static int pulseLength;
     if(isMorphing){
         if(!imgUpdated){
             imgID++;
             setNextImage();
             imgUpdated = true;
-            //            pulse.setAddress("/overdose");
-            //            pulse.addIntArg(1);
-            //            sender.sendMessage(pulse, false);
+            pulse.setAddress("/overdose");
+            pulse.addIntArg(1);
+            sender.sendMessage(pulse, false);
         }
         
-        //        if(pulseLength < 5){
-        //            pulseLength ++;
-        //        }else{
-        //            pulse.setAddress("/overdose");
-        //            pulse.addIntArg(0);
-        //            sender.sendMessage(pulse, false);
-        //        }
+        if(pulseLength < 5){
+            pulseLength ++;
+        }else{
+            pulse.setAddress("/overdose");
+            pulse.addIntArg(0);
+            sender.sendMessage(pulse, false);
+        }
         overdose = 1;
     }else{
         imgUpdated = false;
-        //        pulseLength = 0;
+        pulseLength = 0;
         overdose = 0;
     }
     
     // nodes
     float freq = 0.2;
     for (int i=0; i<numNodes; i++) {
-        float amp = i * 200;
-        node[i].setPosition(ofVec3f(sin(time * freq) * amp, cos(time * freq) * amp, sin(time * freq) * amp));
+        float amp = i*200;
+        node[i].setPosition(ofVec3f(sin(time * freq)*amp, cos(time * freq)*amp, sin(time * freq)*amp));
         freq *= 0.5;
     }
     
+    
     // dispatch to update shader
     pingPong.dst->begin();
+    
     pingPong.dst->activateAllDrawBuffers();
     ofClear(0);
     
     updatePos.begin();
+    
     updatePos.setUniformTexture("u_currPosTex", pingPong.src->getTexture(0), 0);
     updatePos.setUniformTexture("u_currColTex", pingPong.src->getTexture(1), 1);
     updatePos.setUniformTexture("u_velTex", pingPong.src->getTexture(2), 2);
@@ -206,99 +203,58 @@ void ofApp::update(){
     updatePos.setUniformTexture("u_nextColTex", pingPong.src->getTexture(4), 4);
     updatePos.setUniform1f("u_time", time);
     updatePos.setUniform2f("u_resolution", ofGetWidth(), ofGetHeight());
+    updatePos.setUniform3f("u_nodePos", node[0].getPosition());
     updatePos.setUniform1i("u_overdose", overdose);
+    
     pingPong.src->draw(0, 0);
+    
     updatePos.end();
     
     pingPong.dst->end();
     pingPong.swap();
     
-    ofEnableAlphaBlending();
-    renderFBO.begin();
-    
-    ofSetColor(0, 0, 0, 10);
-    ofFill();
-    ofDrawRectangle(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-    /*
-     if(debugMode){
-     for (int i=0; i<numNodes; i++) {
-     if(i==0){
-     ofSetColor(255, 0, 0);
-     }else{
-     ofSetColor(0, 0, 255);
-     }
-     node[i].draw();
-     }
-     }
-     */
-    render.begin();
-    
-    cam.lookAt(node[0]);
-    cam.begin();
-    
-    render.setUniformTexture("u_currPosTex", pingPong.dst->getTexture(0), 0);
-    render.setUniformTexture("u_currColTex", pingPong.dst->getTexture(1), 1);
-    
-    ofPushStyle();
-    ofEnableBlendMode(OF_BLENDMODE_ADD);
-    vbo.draw(GL_POINTS, 0, numParticles);
-    ofDisableBlendMode();
-    
-    glEnd();
-    cam.end();
-    
-    render.end();
-    renderFBO.end();
-    ofPopStyle();
-    
-    /* osc
-     // ID of messages is correspondent to that of variables of MAX multislider
-     if((int)time % 7 == 0){
-     if(!oscSent0){
-     ofxOscMessage msg1, msg2, msg3;
-     msg1.setAddress("/nodePos/x");
-     msg1.addFloatArg(abs(node[1].getPosition().normalize().x));
-     sender.sendMessage(msg1, false);
-     msg2.setAddress("/nodePos/y");
-     msg2.addFloatArg(abs(node[1].getPosition().normalize().y));
-     sender.sendMessage(msg2, false);
-     msg3.setAddress("/nodePos/z");
-     msg3.addFloatArg(abs(node[1].getPosition().normalize().z));
-     sender.sendMessage(msg3, false);
-     oscSent0 = true;
-     }
-     }else{
-     oscSent0 = false;
-     }*/
-    if((int)time % 10 == 0){
+    // osc
+    // ID of messages is correspondent to that of variables of MAX multislider
+    if((int)time % 7 == 0){
+        if(!oscSent0){
+            ofxOscMessage msg1, msg2, msg3;
+            msg1.setAddress("/nodePos/x");
+            msg1.addFloatArg(abs(node[1].getPosition().normalize().x));
+            sender.sendMessage(msg1, false);
+            msg2.setAddress("/nodePos/y");
+            msg2.addFloatArg(abs(node[1].getPosition().normalize().y));
+            sender.sendMessage(msg2, false);
+            msg3.setAddress("/nodePos/z");
+            msg3.addFloatArg(abs(node[1].getPosition().normalize().z));
+            sender.sendMessage(msg3, false);
+            oscSent0 = true;
+        }
+    }else{
+        oscSent0 = false;
+    }
+    if((int)time % 9 == 0){
         static int i, j;
         if(!oscSent1){
-            
             ofxOscMessage msg4, msg5, msg6, msg7;
             msg4.setAddress("/pixel/R");
-            msg4.addFloatArg(pixels[j*width*4+i*4+0] * 0.0039);
+            msg4.addFloatArg(pixels[j*width*4+i*4+0]);
             sender.sendMessage(msg4, false);
             msg5.setAddress("/pixel/G");
-            msg5.addFloatArg(pixels[j*width*4+i*4+1] * 0.0039);
+            msg5.addFloatArg(pixels[j*width*4+i*4+1]);
             sender.sendMessage(msg5, false);
             msg6.setAddress("/pixel/B");
-            msg6.addFloatArg(pixels[j*width*4+i*4+2] * 0.0039);
+            msg6.addFloatArg(pixels[j*width*4+i*4+2]);
             sender.sendMessage(msg6, false);
-            
+            msg7.setAddress("/pixel/T");
+            msg7.addFloatArg(pixels[j*width*4+i*4+3]);
+            sender.sendMessage(msg7, false);
             oscSent1 = true;
-            
-            updatePos.begin();
-            updatePos.setUniform1f("u_pixelR", currCol[j*width*4+i*4+0]);
-            updatePos.setUniform1f("u_pixelG", currCol[j*width*4+i*4+1]);
-            updatePos.setUniform1f("u_pixelB", currCol[j*width*4+i*4+2]);
-            updatePos.end();
-            
-            if(i<width-1){
-                i++;
-                j++;
-            }else{
-                i = j = 0;
-            }
+        }
+        if(i<width-1){
+            i++;
+            j++;
+        }else{
+            i = j = 0;
         }
     }else{
         oscSent1 = false;
@@ -316,10 +272,36 @@ float ofApp::easeInOutQuad (float current, float init, float destination, float 
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofHideCursor();
-    ofBackground(0);
     
-    ofSetColor(255,255,255);
-    renderFBO.draw(0, 0);
+    ofPushStyle();
+    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    ofEnablePointSprites();
+    
+    cam.lookAt(node[0]);
+    cam.begin();
+    if(debugMode){
+        for (int i=0; i<numNodes; i++) {
+            if(i==0){
+                ofSetColor(255, 0, 0);
+            }else{
+                ofSetColor(0, 0, 255);
+            }
+            node[i].draw();
+        }
+    }
+    
+    render.begin();
+    
+    render.setUniformTexture("u_currPosTex", pingPong.src->getTexture(0), 0);
+    render.setUniformTexture("u_currColTex", pingPong.src->getTexture(1), 1);
+    
+    vbo.draw(GL_POINTS, 0, numParticles);
+    
+    render.end();
+    cam.end();
+    
+    ofDisablePointSprites();
+    ofPopStyle();
     
     if(debugMode){
         ofPushStyle();
@@ -329,11 +311,12 @@ void ofApp::draw(){
         pingPong.dst->getTexture(1).draw(288, 0, 288, 288);
         ofDrawBitmapStringHighlight("Current Color", 288, 14);
         pingPong.dst->getTexture(2).draw(576, 0, 288, 288);
-        ofDrawBitmapStringHighlight("Vector Field", 576, 14);
+        ofDrawBitmapStringHighlight("Velocity", 576, 14);
         pingPong.dst->getTexture(3).draw(864, 0, 288, 288);
         ofDrawBitmapStringHighlight("Next Position", 864, 14);
         pingPong.dst->getTexture(4).draw(1152, 0, 288, 288);
         ofDrawBitmapStringHighlight("Next Color", 1152, 14);
+        
         ofPopStyle();
         ofDrawBitmapStringHighlight("FPS : " + ofToString(ofGetFrameRate()), 0, ofGetHeight() - 2);
     }

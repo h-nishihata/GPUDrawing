@@ -38,13 +38,19 @@ public:
     ofFbo renderFBO;
     
     ofNode node[numNodes];
+    
     ofCamera cam;
+    float camPosX = 0;
+    float camPosY = 0;
+    float camPosZ = 512;
+    bool xFlag, yFlag, zFlag;
+    float camZLength = 512;
     
     ofImage img;
     int imgID;
     
-    static const int width = 1080;
-    static const int height = 1080;
+    static const int width = 640;
+    static const int height = 640;
     static const int numParticles = width * height;
     
     ofVbo vbo;
@@ -64,3 +70,4 @@ public:
     bool oscSent0, oscSent1;
     bool debugMode;
 };
+
